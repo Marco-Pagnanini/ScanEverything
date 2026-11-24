@@ -8,8 +8,11 @@ type Severity = "critical" | "high" | "medium" | "low";
 
 type Finding = {
     tool: string;
+    rule: string;
     title: string;
     severity: Severity;
+    security: boolean;
+    cwe: string | null;
     file: string | null;
     line: number | null;
 };
@@ -55,8 +58,13 @@ function App() {
             <p>{findings.length} finding</p>
             <ul style={{ textAlign: "left" }}>
                 {findings.map((f, i) => (
-                    <li key={i}>
-                        [{f.severity}] {f.title} — {f.file ? `${f.file}:${f.line ?? ""}` : "(nessun file)"} ({f.tool})
+                    <li key={i} style={{ opacity: f.security ? 1 : 0.55 }}>
+                        {f.security && <b>SICUREZZA </b>}
+                        [{f.severity}] {f.title}
+                        {f.cwe && ` · ${f.cwe}`}
+                        {" — "}
+                        {f.file ? `${f.file}:${f.line ?? ""}` : "(nessun file)"}
+                        {` (${f.tool} · ${f.rule})`}
                     </li>
                 ))}
             </ul>

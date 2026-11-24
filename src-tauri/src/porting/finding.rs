@@ -16,8 +16,13 @@ pub enum Severity{
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Finding {
     pub tool: String,
+    #[serde(default)] // se manca nel JSON: stringa vuota
+    pub rule: String,
     pub title: String,
     pub severity: Severity,
+    #[serde(default)] // se manca nel JSON: false
+    pub security: bool,
+    pub cwe: Option<String>,
     pub file: Option<String>,
     pub line: Option<u32>,
 }
@@ -32,6 +37,6 @@ mod tests{
         let json = r#"{ "tool": "dependency-check", "title": "Log4Shell", "severity": "critical" }"#;
         let finding: Finding = serde_json::from_str(json).unwrap();
          assert_eq!(finding.severity, Severity::Critical);
-        assert!(finding.file.is_none());
+         assert!(!finding.security);
     }
 }

@@ -1,20 +1,19 @@
 mod porting;
 use porting::finding::Finding;
-
-// #[tauri::command]
-// fn greet(name: &str) -> String {
-//     format!("Hello, {}! You've been greeted from Rust!", name)
-// }
+use porting::sarif::parse_sarif_to_finding;
 
 #[tauri::command]
 fn load_findings(path:String) -> Result<Vec<Finding>, String>{
     let text = std::fs::read_to_string(&path)
         .map_err(|e| format!("Can't read the file{path}: {e}"))?;
 
-    let mut findings: Vec<Finding> =
-        serde_json::from_str(&text).map_err(|e| format!("JSON non valido: {e}"))?;
+    let mut findings:Vec<Finding> = if path.ends_with(".sarif") {
+        parse_sarif_to_finding(&text)?
+    }else{
+        serde_json::from_str(&text).map_err(|e| format!("JSON non valido: {e}"))?
+    };
 
-    findings.sort_by_key(|f| f.severity);
+    findings.sort_by_key(|f| (!f.security, f.severity));
 
     Ok(findings)
 }
