@@ -1,4 +1,3 @@
-
 use serde::{Deserialize, Serialize};
 
 // Deserialize -> take JSON
@@ -6,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
 #[serde(rename_all = "lowercase")]
-pub enum Severity{
+pub enum Severity {
     Critical,
     High,
     Medium,
@@ -27,16 +26,16 @@ pub struct Finding {
     pub line: Option<u32>,
 }
 
-
 #[cfg(test)]
-mod tests{
+mod tests {
     use super::*;
 
     #[test]
-    fn read_json(){
-        let json = r#"{ "tool": "dependency-check", "title": "Log4Shell", "severity": "critical" }"#;
+    fn read_json() {
+        let json =
+            r#"{ "tool": "dependency-check", "title": "Log4Shell", "severity": "critical" }"#;
         let finding: Finding = serde_json::from_str(json).unwrap();
-         assert_eq!(finding.severity, Severity::Critical);
-         assert!(!finding.security);
+        assert_eq!(finding.severity, Severity::Critical);
+        assert!(!finding.security);
     }
 }

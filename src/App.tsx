@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { open } from "@tauri-apps/plugin-dialog";
 import "./App.css";
 
-// Stessa forma della struct Rust (per ora scritta a mano;
-// più avanti la genereremo automaticamente dal Rust).
 type Severity = "critical" | "high" | "medium" | "low";
 
 type Finding = {
@@ -17,46 +16,89 @@ type Finding = {
     line: number | null;
 };
 
+type ToolCheck = { name: string; ok: boolean; detail: string };
+
 function App() {
-    const [path, setPath] = useState("");
+    const [tools, setTools] = useState<ToolCheck[]>([]);
+    const [input, setInput] = useState<string | null>(null);
     const [findings, setFindings] = useState<Finding[]>([]);
     const [error, setError] = useState<string | null>(null);
+    const [running, setRunning] = useState(false);
 
-    async function load() {
+    // All'apertura: controlla gli strumenti
+    useEffect(() => {
+        invoke<ToolCheck[]>("check_tools")
+            .then(setTools)
+            .catch((e) => setError(String(e)));
+    }, []);
+
+    const toolsOk = tools.length > 0 && tools.every((t) => t.ok);
+
+    function pick(path: string) {
+        setInput(path);
+        setFindings([]);
         setError(null);
+    }
+
+    async function chooseProject() {
+        const dir = await open({ directory: true, multiple: false, title: "Progetto Maven da analizzare" });
+        if (typeof dir === "string") pick(dir);
+    }
+
+    async function chooseJar() {
+        const file = await open({
+            directory: false,
+            multiple: false,
+            title: "Jar da analizzare",
+            filters: [{ name: "Java archive", extensions: ["jar"] }],
+        });
+        if (typeof file === "string") pick(file);
+    }
+
+    async function scan() {
+        if (!input) return;
+        setError(null);
+        setFindings([]);
+        setRunning(true);
         try {
-            const result = await invoke<Finding[]>("load_findings", { path });
-            setFindings(result);
+            setFindings(await invoke<Finding[]>("scan_project", { input }));
         } catch (e) {
-            setFindings([]);
             setError(String(e));
+        } finally {
+            setRunning(false);
         }
     }
 
     return (
-        <main className="container">
+        <main className="container" style={{ textAlign: "left" }}>
             <h1>Scan Everything</h1>
 
-            <form
-                className="row"
-                onSubmit={(e) => {
-                    e.preventDefault();
-                    load();
-                }}
-            >
-                <input
-                    value={path}
-                    onChange={(e) => setPath(e.currentTarget.value)}
-                    placeholder="Percorso completo di findings.json"
-                    style={{ width: 420 }}
-                />
-                <button type="submit">Carica</button>
-            </form>
+            <h3>Strumenti</h3>
+            <ul>
+                {tools.map((t) => (
+                    <li key={t.name} style={{ color: t.ok ? "seagreen" : "tomato" }}>
+                        {t.ok ? "✔" : "✘"} <b>{t.name}</b> — {t.detail}
+                    </li>
+                ))}
+            </ul>
 
-            {error && <p style={{ color: "tomato" }}>{error}</p>}
+            <div className="row" style={{ gap: 8, justifyContent: "flex-start" }}>
+                <button onClick={chooseProject} disabled={running}>Scegli progetto</button>
+                <button onClick={chooseJar} disabled={running}>Scegli jar</button>
+                <button onClick={scan} disabled={!input || !toolsOk || running}>
+                    {running ? "Analisi in corso…" : "Analizza"}
+                </button>
+            </div>
+            <p><code>{input ?? "Niente da analizzare"}</code></p>
 
-            <p>{findings.length} finding</p>
-            <ul style={{ textAlign: "left" }}>
+            {error && <pre style={{ color: "tomato", whiteSpace: "pre-wrap" }}>{error}</pre>}
+
+            {findings.length > 0 && (
+                <p>
+                    {findings.length} finding · {findings.filter((f) => f.security).length} di sicurezza
+                </p>
+            )}
+            <ul>
                 {findings.map((f, i) => (
                     <li key={i} style={{ opacity: f.security ? 1 : 0.55 }}>
                         {f.security && <b>SICUREZZA </b>}

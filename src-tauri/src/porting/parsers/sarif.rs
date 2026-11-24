@@ -1,10 +1,10 @@
+use crate::porting::finding::{Finding, Severity};
 use serde::Deserialize;
-
 
 /*
     Structur of SARIF file
 */
-use super::finding::{Finding, Severity};
+
 #[derive(Debug, Deserialize)]
 struct SarifLog {
     runs: Vec<Run>,
@@ -103,11 +103,10 @@ struct Region {
     Convert SARIF to Finding
 */
 
-pub fn parse_sarif_to_finding(text:&str) -> Result<Vec<Finding>, String>{
-    let log: SarifLog =
-        serde_json::from_str(text).map_err(|e| format!("SARIF non valido: {e}"))?;
+pub fn parse_sarif_to_finding(text: &str) -> Result<Vec<Finding>, String> {
+    let log: SarifLog = serde_json::from_str(text).map_err(|e| format!("SARIF non valido: {e}"))?;
 
-    let mut findings:Vec<Finding> = Vec::new();
+    let mut findings: Vec<Finding> = Vec::new();
 
     for run in log.runs {
         let tool = run.tool.driver.name.to_lowercase();
@@ -195,7 +194,7 @@ mod tests {
     use super::*;
 
     // Il file viene incluso nel programma di test al momento della compilazione.
-    const VULNAPP: &str = include_str!("../../fixtures/spotbugs_vulnapp.sarif");
+    const VULNAPP: &str = include_str!("../../../fixtures/spotbugs_vulnapp.sarif");
 
     #[test]
     fn legge_tutti_i_risultati() {
