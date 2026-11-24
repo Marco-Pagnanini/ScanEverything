@@ -6,11 +6,13 @@ use crate::porting::finding::Finding;
 use crate::porting::process::ToolCheck;
 use crate::porting::tools::{dependency_check, maven, spotbugs};
 
+use ts_rs::TS;
 /*
     Report of a scan
 */
 
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, TS, PartialEq)]
+#[ts(export)]
 #[serde(rename_all = "lowercase")]
 pub enum StepStatus {
     Ok,
@@ -18,7 +20,8 @@ pub enum StepStatus {
     Skipped,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, TS)]
+#[ts(export)]
 pub struct StepResult {
     pub name: String,
     pub status: StepStatus,
@@ -26,7 +29,8 @@ pub struct StepResult {
     pub detail: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, TS)]
+#[ts(export)]
 pub struct ScanReport {
     pub steps: Vec<StepResult>,
     pub findings: Vec<Finding>,

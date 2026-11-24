@@ -4,6 +4,8 @@ use std::process::Command;
 
 use serde::Serialize;
 
+use ts_rs::TS;
+
 pub struct CommandOutput {
     pub code: Option<i32>,
     pub stdout: String,
@@ -27,7 +29,8 @@ pub fn run(path: &str, args: &[&str], dir: &Path) -> Result<CommandOutput, Strin
     })
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, TS)]
+#[ts(export)]
 pub struct ToolCheck {
     pub tool: String,
     pub name: String,
