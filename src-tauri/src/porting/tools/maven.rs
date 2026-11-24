@@ -7,33 +7,54 @@ pub fn check() -> ToolCheck {
     check_tool("Maven", "mvn", "-version")
 }
 
-/// Step "Build": compila un progetto Maven.
-/// Restituisce la cartella con le classi compilate (target/classes).
-pub fn build(project: &Path) -> Result<PathBuf, String> {
+fn mvn(project: &Path, args: &[&str]) -> Result<(), String> {
     if !project.join("pom.xml").is_file() {
         return Err(format!("No pom.xml in {}", project.display()));
     }
 
-    let out = run("mvn", &["-B", "-q", "package", "-DskipTests"], project)?;
+    let out = run("mvn", args, project)?;
 
     if out.code != Some(0) {
         return Err(format!(
-            "Maven build failed (exit code {:?}):\n{}",
+            "Maven failed (exit code {:?}):\n{}",
             out.code,
             last_lines(&format!("{}{}", out.stdout, out.stderr), 25)
         ));
     }
+    Ok(())
+}
+
+
+
+/// Step "Build": compila un progetto Maven.
+/// Restituisce la cartella con le classi compilate (target/classes).
+pub fn build(project: &Path) -> Result<PathBuf, String> {
+    mvn(project, &["-B", "-q", "package", "-DskipTests"])?;
 
     let classes = project.join("target").join("classes");
     if classes.is_dir() {
         Ok(classes)
     } else {
-        Err(format!(
-            "Maven finished but {} does not exist",
-            classes.display()
-        ))
+        Err(format!("Maven finished but {} does not exist", classes.display()))
     }
 }
+
+pub fn copy_dependencies(project: &Path) -> Result<PathBuf, String> {
+    mvn(
+        project,
+        &["-B", "-q", "dependency:copy-dependencies", "-DincludeScope=runtime"],
+    )?;
+
+    let deps = project.join("target").join("dependency");
+    std::fs::create_dir_all(&deps)
+        .map_err(|e| format!("Cannot create {}: {e}", deps.display()))?;
+    Ok(deps)
+}
+
+/*
+    Tests
+*/
+
 
 #[cfg(test)]
 mod tests {
@@ -42,6 +63,12 @@ mod tests {
     #[test]
     fn cartella_senza_pom() {
         let err = build(Path::new(".")).unwrap_err();
+        assert!(err.contains("pom.xml"));
+    }
+
+        #[test]
+    fn dipendenze_senza_pom() {
+        let err = copy_dependencies(Path::new(".")).unwrap_err();
         assert!(err.contains("pom.xml"));
     }
 }
