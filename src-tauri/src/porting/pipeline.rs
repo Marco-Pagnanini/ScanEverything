@@ -1,17 +1,18 @@
 use std::path::Path;
 
 use serde::Serialize;
+use ts_rs::TS;
 
 use crate::porting::finding::Finding;
+use crate::porting::manifest::{Need, ToolKind, ToolManifest, builtin_manifests};
 use crate::porting::process::ToolCheck;
-use crate::porting::tools::{dependency_check, maven, spotbugs};
+use crate::porting::tools::{generic, maven};
 
-use ts_rs::TS;
 /*
     Report of a scan
 */
 
-#[derive(Debug, Serialize, TS, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, TS)]
 #[ts(export)]
 #[serde(rename_all = "lowercase")]
 pub enum StepStatus {
@@ -74,21 +75,54 @@ impl ScanReport {
 }
 
 /*
-    Pipeline
+    Tools
 */
 
+#[derive(Debug, Serialize, TS)]
+#[ts(export)]
+pub struct ToolInfo {
+    pub id: String,
+    pub name: String,
+    pub kind: ToolKind,
+    pub description: String,
+    pub needs: Vec<Need>,
+}
+
+pub fn list_tools() -> Vec<ToolInfo> {
+    builtin_manifests()
+        .into_iter()
+        .map(|m| ToolInfo {
+            id: m.id,
+            name: m.name,
+            kind: m.kind,
+            description: m.description,
+            needs: m.run.needs,
+        })
+        .collect()
+}
+
 pub fn check_tools() -> Vec<ToolCheck> {
+    let vars = generic::base_vars();
     let mut checks = vec![maven::check()];
-    checks.extend(spotbugs::check());
-    checks.extend(dependency_check::check());
+    for manifest in builtin_manifests() {
+        checks.extend(generic::check(&manifest, &vars));
+    }
     checks
 }
+
+/*
+    Pipeline
+*/
 
 pub fn scan(input: &Path, tools: &[String]) -> ScanReport {
     let mut report = ScanReport::new();
     let jar = is_jar(input);
-    let use_spotbugs = tools.iter().any(|t| t == "spotbugs");
-    let use_depcheck = tools.iter().any(|t| t == "dependency-check");
+
+    let chosen: Vec<ToolManifest> = builtin_manifests()
+        .into_iter()
+        .filter(|m| tools.contains(&m.id))
+        .collect();
+    let needs = |need: Need| chosen.iter().any(|m| m.run.needs.contains(&need));
 
     let out_dir = if jar {
         std::env::temp_dir().join("scaneverything")
@@ -96,7 +130,7 @@ pub fn scan(input: &Path, tools: &[String]) -> ScanReport {
         input.join("target")
     };
 
-    let classes = if !use_spotbugs {
+    let classes = if !needs(Need::Classes) {
         None
     } else if jar {
         report.skipped("Build", "the input is a jar");
@@ -114,7 +148,7 @@ pub fn scan(input: &Path, tools: &[String]) -> ScanReport {
         }
     };
 
-    let deps = if !use_depcheck {
+    let deps = if !needs(Need::Dependencies) {
         None
     } else if jar {
         report.skipped("Copy dependencies", "the input is a jar");
@@ -132,36 +166,43 @@ pub fn scan(input: &Path, tools: &[String]) -> ScanReport {
         }
     };
 
-    if use_spotbugs {
-        if let Some(reason) = not_ready(spotbugs::check()) {
-            report.skipped("SpotBugs", &reason);
-        } else {
-            match &classes {
-                None => report.skipped("SpotBugs", "no compiled classes"),
-                Some(classes) => match spotbugs::analyze(classes, &out_dir) {
-                    Ok(found) => report.ok("SpotBugs", found),
-                    Err(e) => report.failed("SpotBugs", e),
-                },
-            }
-        }
+    let mut vars = generic::base_vars();
+    vars.insert("out".to_string(), out_dir.display().to_string());
+    vars.insert("name".to_string(), project_name(input));
+    if let Some(classes) = &classes {
+        vars.insert("classes".to_string(), classes.display().to_string());
+    }
+    if let Some(deps) = &deps {
+        vars.insert("dependencies".to_string(), deps.display().to_string());
     }
 
-    if use_depcheck {
-        if let Some(reason) = not_ready(dependency_check::check()) {
-            report.skipped("Dependency-Check", &reason);
+    for manifest in &chosen {
+        let missing = manifest.run.needs.iter().find(|need| match need {
+            Need::Classes => classes.is_none(),
+            Need::Dependencies => deps.is_none(),
+        });
+
+        if let Some(reason) = not_ready(generic::check(manifest, &vars)) {
+            report.skipped(&manifest.name, &reason);
+        } else if let Some(need) = missing {
+            report.skipped(&manifest.name, need_label(*need));
         } else {
-            match &deps {
-                None => report.skipped("Dependency-Check", "no libraries to analyze"),
-                Some(deps) => match dependency_check::analyze(deps, &out_dir, &project_name(input)) {
-                    Ok(found) => report.ok("Dependency-Check", found),
-                    Err(e) => report.failed("Dependency-Check", e),
-                },
+            match generic::analyze(manifest, &vars, &out_dir) {
+                Ok(found) => report.ok(&manifest.name, found),
+                Err(e) => report.failed(&manifest.name, e),
             }
         }
     }
 
     report.findings.sort_by_key(|f| (!f.security, f.severity));
     report
+}
+
+fn need_label(need: Need) -> &'static str {
+    match need {
+        Need::Classes => "no compiled classes",
+        Need::Dependencies => "no libraries to analyze",
+    }
 }
 
 fn not_ready(checks: Vec<ToolCheck>) -> Option<String> {
@@ -206,21 +247,19 @@ mod tests {
     #[test]
     fn primo_strumento_non_pronto() {
         let checks = vec![
-            ToolCheck {
-                tool: "x".to_string(),
-                name: "A".to_string(),
-                ok: true,
-                detail: "1.0".to_string(),
-            },
-            ToolCheck {
-                tool: "x".to_string(),
-                name: "B".to_string(),
-                ok: false,
-                detail: "not found".to_string(),
-            },
+            ToolCheck::new("x", "A", true, "1.0"),
+            ToolCheck::new("x", "B", false, "not found"),
         ];
         assert_eq!(not_ready(checks), Some("B: not found".to_string()));
         assert_eq!(not_ready(Vec::new()), None);
+    }
+
+    #[test]
+    fn lista_degli_strumenti() {
+        let tools = list_tools();
+        let ids: Vec<&str> = tools.iter().map(|t| t.id.as_str()).collect();
+        assert_eq!(ids, ["spotbugs", "dependency-check"]);
+        assert_eq!(tools[0].needs, [Need::Classes]);
     }
 
     #[test]

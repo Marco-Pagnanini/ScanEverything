@@ -6,15 +6,17 @@ import type { Finding } from "./bindings/Finding";
 import type { ScanReport } from "./bindings/ScanReport";
 import type { StepResult } from "./bindings/StepResult";
 import type { ToolCheck } from "./bindings/ToolCheck";
+import type { ToolInfo } from "./bindings/ToolInfo";
 
-const ANALYSIS_TOOLS = [
-    { id: "spotbugs", name: "SpotBugs" },
-    { id: "dependency-check", name: "Dependency-Check" },
-];
+const GROUPS = [
+    { kind: "static", label: "Analisi statica" },
+    { kind: "dynamic", label: "Analisi dinamica" },
+] as const;
 
 function App() {
+    const [catalog, setCatalog] = useState<ToolInfo[]>([]);
     const [tools, setTools] = useState<ToolCheck[]>([]);
-    const [selected, setSelected] = useState<string[]>(ANALYSIS_TOOLS.map((t) => t.id));
+    const [selected, setSelected] = useState<string[]>([]);
     const [input, setInput] = useState<string | null>(null);
     const [steps, setSteps] = useState<StepResult[]>([]);
     const [findings, setFindings] = useState<Finding[]>([]);
@@ -22,6 +24,13 @@ function App() {
     const [running, setRunning] = useState(false);
 
     useEffect(() => {
+        invoke<ToolInfo[]>("list_tools")
+            .then((list) => {
+                setCatalog(list);
+                setSelected(list.map((t) => t.id));
+            })
+            .catch((e) => setError(String(e)));
+
         invoke<ToolCheck[]>("check_tools")
             .then(setTools)
             .catch((e) => setError(String(e)));
@@ -80,25 +89,36 @@ function App() {
             <h3>Strumenti</h3>
             <ul>
                 {tools.map((t) => (
-                    <li key={t.name} style={{ color: t.ok ? "seagreen" : "tomato" }}>
+                    <li key={`${t.tool}-${t.name}`} style={{ color: t.ok ? "seagreen" : "tomato" }}>
                         {t.ok ? "✔" : "✘"} <b>{t.name}</b> — {t.detail}
                     </li>
                 ))}
             </ul>
 
             <h3>Pipeline</h3>
-            {ANALYSIS_TOOLS.map((t) => (
-                <label key={t.id} style={{ display: "block" }}>
-                    <input
-                        type="checkbox"
-                        checked={selected.includes(t.id)}
-                        onChange={() => toggle(t.id)}
-                        disabled={running}
-                    />{" "}
-                    {t.name}
-                    {!ready(t.id) && <span style={{ color: "tomato" }}> — non pronto</span>}
-                </label>
-            ))}
+            {GROUPS.map(({ kind, label }) => {
+                const group = catalog.filter((t) => t.kind === kind);
+                if (group.length === 0) return null;
+                return (
+                    <div key={kind} style={{ marginBottom: 8 }}>
+                        <b>{label}</b>
+                        {group.map((t) => (
+                            <label key={t.id} style={{ display: "block" }}>
+                                <input
+                                    type="checkbox"
+                                    checked={selected.includes(t.id)}
+                                    onChange={() => toggle(t.id)}
+                                    disabled={running}
+                                />{" "}
+                                {t.name}
+                                {!ready(t.id) && <span style={{ color: "tomato" }}> — non pronto</span>}
+                                <br />
+                                <small style={{ opacity: 0.7 }}>{t.description}</small>
+                            </label>
+                        ))}
+                    </div>
+                );
+            })}
 
             <div className="row" style={{ gap: 8, justifyContent: "flex-start", marginTop: 12 }}>
                 <button onClick={chooseProject} disabled={running}>Scegli progetto</button>

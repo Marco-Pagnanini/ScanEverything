@@ -4,7 +4,7 @@ use std::path::Path;
 
 use porting::finding::Finding;
 use porting::parsers::sarif::parse_sarif_to_finding;
-use porting::pipeline::{self, ScanReport};
+use porting::pipeline::{self, ScanReport, ToolInfo};
 use porting::process::ToolCheck;
 
 #[tauri::command]
@@ -20,6 +20,11 @@ fn load_findings(path: String) -> Result<Vec<Finding>, String> {
 
     findings.sort_by_key(|f| (!f.security, f.severity));
     Ok(findings)
+}
+
+#[tauri::command]
+fn list_tools() -> Vec<ToolInfo> {
+    pipeline::list_tools()
 }
 
 #[tauri::command]
@@ -43,6 +48,7 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             load_findings,
+            list_tools,
             check_tools,
             scan_project
         ])

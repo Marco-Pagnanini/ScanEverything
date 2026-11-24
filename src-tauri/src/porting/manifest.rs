@@ -1,18 +1,22 @@
-use serde::Deserialize;
 use std::collections::HashMap;
+
+use serde::{Deserialize, Serialize};
+use ts_rs::TS;
 
 /*
     Manifest of a tool
 */
 
-#[derive(Debug, Deserialize, Clone, Copy, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, TS)]
+#[ts(export)]
 #[serde(rename_all = "lowercase")]
 pub enum ToolKind {
     Static,
     Dynamic,
 }
 
-#[derive(Debug, Deserialize, Clone, Copy, PartialEq)]
+#[derive(Debug, Serialize, Deserialize, Clone, Copy, PartialEq, TS)]
+#[ts(export)]
 #[serde(rename_all = "lowercase")]
 pub enum Need {
     Classes,
@@ -76,6 +80,7 @@ pub fn builtin_manifests() -> Vec<ToolManifest> {
     .map(|text| parse_manifest(text).expect("built-in manifest is valid"))
     .collect()
 }
+
 /*
     Placeholders
 */
@@ -110,6 +115,7 @@ fn lookup(key: &str, vars: &HashMap<String, String>) -> Result<String, String> {
         .cloned()
         .ok_or_else(|| format!("Unknown placeholder {{{key}}}"))
 }
+
 /*
     Tests
 */
@@ -137,6 +143,7 @@ mod tests {
         assert_eq!(m.check.env, ["NVD_API_KEY"]);
         assert_eq!(m.run.needs, [Need::Dependencies]);
     }
+
     fn vars() -> HashMap<String, String> {
         HashMap::from([
             ("home".to_string(), "/Users/marco".to_string()),
