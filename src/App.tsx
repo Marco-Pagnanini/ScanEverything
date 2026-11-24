@@ -1,37 +1,67 @@
 import { useState } from "react";
-import reactLogo from "./assets/react.svg";
 import { invoke } from "@tauri-apps/api/core";
 import "./App.css";
 
+// Stessa forma della struct Rust (per ora scritta a mano;
+// più avanti la genereremo automaticamente dal Rust).
+type Severity = "critical" | "high" | "medium" | "low";
+
+type Finding = {
+    tool: string;
+    title: string;
+    severity: Severity;
+    file: string | null;
+    line: number | null;
+};
+
 function App() {
-  const [greetMsg, setGreetMsg] = useState("");
-  const [name, setName] = useState("");
+    const [path, setPath] = useState("");
+    const [findings, setFindings] = useState<Finding[]>([]);
+    const [error, setError] = useState<string | null>(null);
 
-  async function greet() {
+    async function load() {
+        setError(null);
+        try {
+            const result = await invoke<Finding[]>("load_findings", { path });
+            setFindings(result);
+        } catch (e) {
+            setFindings([]);
+            setError(String(e));
+        }
+    }
 
-    setGreetMsg(await invoke("greet", { name }));
-  }
+    return (
+        <main className="container">
+            <h1>Scan Everything</h1>
 
-  return (
-    <main className="container">
-      <h1>Welcome to Tauri + React</h1>
-      <form
-        className="row"
-        onSubmit={(e) => {
-          e.preventDefault();
-          greet();
-        }}
-      >
-        <input
-          id="greet-input"
-          onChange={(e) => setName(e.currentTarget.value)}
-          placeholder="Enter a name..."
-        />
-        <button type="submit">Greet</button>
-      </form>
-      <p>{greetMsg}</p>
-    </main>
-  );
+            <form
+                className="row"
+                onSubmit={(e) => {
+                    e.preventDefault();
+                    load();
+                }}
+            >
+                <input
+                    value={path}
+                    onChange={(e) => setPath(e.currentTarget.value)}
+                    placeholder="Percorso completo di findings.json"
+                    style={{ width: 420 }}
+                />
+                <button type="submit">Carica</button>
+            </form>
+
+            {error && <p style={{ color: "tomato" }}>{error}</p>}
+
+            <p>{findings.length} finding</p>
+            <ul style={{ textAlign: "left" }}>
+                {findings.map((f, i) => (
+                    <li key={i}>
+                        [{f.severity}] {f.title} — {f.file ? `${f.file}:${f.line ?? ""}` : "(nessun file)"} ({f.tool})
+                    </li>
+                ))}
+            </ul>
+        </main>
+    );
 }
 
 export default App;

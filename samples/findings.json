@@ -1,0 +1,6 @@
+[
+  { "tool": "spotbugs", "title": "SQL Injection", "severity": "critical", "file": "BookDao.java", "line": 42 },
+  { "tool": "spotbugs", "title": "Path Traversal", "severity": "high", "file": "CoverController.java", "line": 88 },
+  { "tool": "dependency-check", "title": "Log4Shell", "severity": "critical", "file": null, "line": null },
+  { "tool": "spotbugs", "title": "Reflected XSS", "severity": "medium", "file": "search.jsp", "line": 12 }
+]
