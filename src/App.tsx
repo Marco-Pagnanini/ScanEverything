@@ -2,33 +2,10 @@ import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { open } from "@tauri-apps/plugin-dialog";
 import "./App.css";
-
-type Severity = "critical" | "high" | "medium" | "low";
-
-type Finding = {
-    tool: string;
-    rule: string;
-    title: string;
-    description: string | null;
-    severity: Severity;
-    security: boolean;
-    cwe: string | null;
-    cve: string | null;
-    package: string | null;
-    file: string | null;
-    line: number | null;
-};
-
-type StepResult = {
-    name: string;
-    status: "ok" | "failed" | "skipped";
-    findings: number;
-    detail: string | null;
-};
-
-type ScanReport = { steps: StepResult[]; findings: Finding[] };
-
-type ToolCheck = { tool: string; name: string; ok: boolean; detail: string };
+import type { Finding } from "./bindings/Finding";
+import type { ScanReport } from "./bindings/ScanReport";
+import type { StepResult } from "./bindings/StepResult";
+import type { ToolCheck } from "./bindings/ToolCheck";
 
 const ANALYSIS_TOOLS = [
     { id: "spotbugs", name: "SpotBugs" },
