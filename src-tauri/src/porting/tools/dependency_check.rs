@@ -13,11 +13,13 @@ fn nvd_api_key() -> Option<String> {
 pub fn check() -> Vec<ToolCheck> {
     let key = match nvd_api_key() {
         Some(_) => ToolCheck {
+            tool: "dependency-check".to_string(),
             name: "NVD API key".to_string(),
             ok: true,
             detail: "NVD_API_KEY is set".to_string(),
         },
         None => ToolCheck {
+            tool: "dependency-check".to_string(),
             name: "NVD API key".to_string(),
             ok: false,
             detail: "NVD_API_KEY is not set".to_string(),
@@ -25,7 +27,7 @@ pub fn check() -> Vec<ToolCheck> {
     };
 
     vec![
-        check_tool("Dependency-Check", "dependency-check", "--version"),
+        check_tool("dependency-check", "Dependency-Check", "dependency-check", "--version"),
         key,
     ]
 }

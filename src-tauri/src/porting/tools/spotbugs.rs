@@ -22,18 +22,20 @@ fn fsb_plugin_path() -> Result<PathBuf, String> {
 pub fn check() -> Vec<ToolCheck> {
     let plugin = match fsb_plugin_path() {
         Ok(path) => ToolCheck {
+            tool: "findsecbugs".to_string(),
             name: "Find Security Bugs".to_string(),
             ok: true,
             detail: path.display().to_string(),
         },
         Err(e) => ToolCheck {
+            tool: "findsecbugs".to_string(),
             name: "Find Security Bugs".to_string(),
             ok: false,
             detail: e,
         },
     };
 
-    vec![check_tool("SpotBugs", "spotbugs", "-version"), plugin]
+    vec![check_tool("spotbugs", "SpotBugs", "spotbugs", "-version"), plugin]
 }
 
 pub fn analyze(classes: &Path, out_dir: &Path) -> Result<Vec<Finding>, String> {

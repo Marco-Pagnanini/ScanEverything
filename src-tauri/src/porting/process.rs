@@ -29,14 +29,16 @@ pub fn run(path: &str, args: &[&str], dir: &Path) -> Result<CommandOutput, Strin
 
 #[derive(Debug, Serialize)]
 pub struct ToolCheck {
+    pub tool: String,
     pub name: String,
     pub ok: bool,
     pub detail: String,
 }
 
-pub fn check_tool(name: &str, program: &str, version_arg: &str) -> ToolCheck {
+pub fn check_tool(tool: &str, name: &str, program: &str, version_arg: &str) -> ToolCheck {
     match run(program, &[version_arg], Path::new(".")) {
         Ok(out) if out.code == Some(0) => ToolCheck {
+            tool: tool.to_string(),
             name: name.to_string(),
             ok: true,
             detail: first_useful_line(&out.stdout)
@@ -44,11 +46,13 @@ pub fn check_tool(name: &str, program: &str, version_arg: &str) -> ToolCheck {
                 .unwrap_or_else(|| "installed".to_string()),
         },
         Ok(out) => ToolCheck {
+            tool: tool.to_string(),
             name: name.to_string(),
             ok: false,
             detail: format!("{program} answered with exit code {:?}", out.code),
         },
         Err(e) => ToolCheck {
+            tool: tool.to_string(),
             name: name.to_string(),
             ok: false,
             detail: e,
@@ -78,7 +82,7 @@ mod tests {
 
     #[test]
     fn programma_inesistente() {
-        let check = check_tool("Fake", "programma-che-non-esiste-123", "-version");
+        let check = check_tool("fake", "Fake", "programma-che-non-esiste-123", "-version");
         assert!(!check.ok);
         assert!(check.detail.contains("non trovato"));
     }

@@ -28,31 +28,40 @@ type StepResult = {
 
 type ScanReport = { steps: StepResult[]; findings: Finding[] };
 
-type ToolCheck = { name: string; ok: boolean; detail: string };
+type ToolCheck = { tool: string; name: string; ok: boolean; detail: string };
+
+const ANALYSIS_TOOLS = [
+    { id: "spotbugs", name: "SpotBugs" },
+    { id: "dependency-check", name: "Dependency-Check" },
+];
 
 function App() {
     const [tools, setTools] = useState<ToolCheck[]>([]);
+    const [selected, setSelected] = useState<string[]>(ANALYSIS_TOOLS.map((t) => t.id));
     const [input, setInput] = useState<string | null>(null);
+    const [steps, setSteps] = useState<StepResult[]>([]);
     const [findings, setFindings] = useState<Finding[]>([]);
     const [error, setError] = useState<string | null>(null);
     const [running, setRunning] = useState(false);
-    const [steps, setSteps] = useState<StepResult[]>([]);
-    const [loading, setLoading] = useState(false);
 
-    // All'apertura: controlla gli strumenti
     useEffect(() => {
         invoke<ToolCheck[]>("check_tools")
             .then(setTools)
             .catch((e) => setError(String(e)));
     }, []);
 
-    const toolsOk = tools.length > 0 && tools.every((t) => t.ok);
+    const ready = (tool: string) => tools.filter((t) => t.tool === tool).every((t) => t.ok);
+    const canRun = tools.length > 0 && selected.length > 0 && ready("maven") && selected.every(ready);
+
+    function toggle(id: string) {
+        setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
+    }
 
     function pick(path: string) {
         setInput(path);
+        setSteps([]);
         setFindings([]);
         setError(null);
-        setSteps([]);
     }
 
     async function chooseProject() {
@@ -71,20 +80,19 @@ function App() {
     }
 
     async function scan() {
-        setLoading(true);
         if (!input) return;
         setError(null);
+        setSteps([]);
         setFindings([]);
         setRunning(true);
         try {
-            const report = await invoke<ScanReport>("scan_project", { input });
+            const report = await invoke<ScanReport>("scan_project", { input, tools: selected });
             setSteps(report.steps);
             setFindings(report.findings);
         } catch (e) {
             setError(String(e));
         } finally {
             setRunning(false);
-            setLoading(false);
         }
     }
 
@@ -101,17 +109,32 @@ function App() {
                 ))}
             </ul>
 
-            <div className="row" style={{ gap: 8, justifyContent: "flex-start" }}>
+            <h3>Pipeline</h3>
+            {ANALYSIS_TOOLS.map((t) => (
+                <label key={t.id} style={{ display: "block" }}>
+                    <input
+                        type="checkbox"
+                        checked={selected.includes(t.id)}
+                        onChange={() => toggle(t.id)}
+                        disabled={running}
+                    />{" "}
+                    {t.name}
+                    {!ready(t.id) && <span style={{ color: "tomato" }}> — non pronto</span>}
+                </label>
+            ))}
+
+            <div className="row" style={{ gap: 8, justifyContent: "flex-start", marginTop: 12 }}>
                 <button onClick={chooseProject} disabled={running}>Scegli progetto</button>
                 <button onClick={chooseJar} disabled={running}>Scegli jar</button>
-                <button onClick={scan} disabled={!input || !toolsOk || running}>
+                <button onClick={scan} disabled={!input || !canRun || running}>
                     {running ? "Analisi in corso…" : "Analizza"}
-                    {loading && <span className="spinner" style={{ marginLeft: 8 }}></span>}
+                    {running && <span className="spinner" style={{ marginLeft: 8 }}></span>}
                 </button>
             </div>
             <p><code>{input ?? "Niente da analizzare"}</code></p>
 
             {error && <pre style={{ color: "tomato", whiteSpace: "pre-wrap" }}>{error}</pre>}
+
             {steps.length > 0 && (
                 <>
                     <h3>Step</h3>
@@ -120,8 +143,7 @@ function App() {
                             <li
                                 key={s.name}
                                 style={{
-                                    color:
-                                        s.status === "ok" ? "seagreen" : s.status === "failed" ? "tomato" : "gray",
+                                    color: s.status === "ok" ? "seagreen" : s.status === "failed" ? "tomato" : "gray",
                                 }}
                             >
                                 {s.status === "ok" ? "✔" : s.status === "failed" ? "✘" : "–"} <b>{s.name}</b>

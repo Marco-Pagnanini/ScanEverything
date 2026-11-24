@@ -1,9 +1,10 @@
 use std::path::Path;
+
 use serde::Serialize;
 
 use crate::porting::finding::Finding;
 use crate::porting::process::ToolCheck;
-use crate::porting::tools::{maven, spotbugs, dependency_check};
+use crate::porting::tools::{dependency_check, maven, spotbugs};
 
 /*
     Report of a scan
@@ -72,7 +73,6 @@ impl ScanReport {
     Pipeline
 */
 
-/// Controlla tutti gli strumenti della pipeline.
 pub fn check_tools() -> Vec<ToolCheck> {
     let mut checks = vec![maven::check()];
     checks.extend(spotbugs::check());
@@ -80,23 +80,11 @@ pub fn check_tools() -> Vec<ToolCheck> {
     checks
 }
 
-
-
-fn is_jar(path: &Path) -> bool {
-    path.is_file() && path.extension().is_some_and(|e| e == "jar")
-}
-
-fn project_name(input: &Path) -> String {
-    input
-        .file_stem()
-        .and_then(|name| name.to_str())
-        .unwrap_or("project")
-        .to_string()
-}
-
-pub fn scan(input: &Path) -> ScanReport {
+pub fn scan(input: &Path, tools: &[String]) -> ScanReport {
     let mut report = ScanReport::new();
     let jar = is_jar(input);
+    let use_spotbugs = tools.iter().any(|t| t == "spotbugs");
+    let use_depcheck = tools.iter().any(|t| t == "dependency-check");
 
     let out_dir = if jar {
         std::env::temp_dir().join("scaneverything")
@@ -104,7 +92,9 @@ pub fn scan(input: &Path) -> ScanReport {
         input.join("target")
     };
 
-    let classes = if jar {
+    let classes = if !use_spotbugs {
+        None
+    } else if jar {
         report.skipped("Build", "the input is a jar");
         Some(input.to_path_buf())
     } else {
@@ -120,7 +110,9 @@ pub fn scan(input: &Path) -> ScanReport {
         }
     };
 
-    let deps = if jar {
+    let deps = if !use_depcheck {
+        None
+    } else if jar {
         report.skipped("Copy dependencies", "the input is a jar");
         None
     } else {
@@ -136,25 +128,60 @@ pub fn scan(input: &Path) -> ScanReport {
         }
     };
 
-    match &classes {
-        None => report.skipped("SpotBugs", "no compiled classes"),
-        Some(classes) => match spotbugs::analyze(classes, &out_dir) {
-            Ok(found) => report.ok("SpotBugs", found),
-            Err(e) => report.failed("SpotBugs", e),
-        },
+    if use_spotbugs {
+        if let Some(reason) = not_ready(spotbugs::check()) {
+            report.skipped("SpotBugs", &reason);
+        } else {
+            match &classes {
+                None => report.skipped("SpotBugs", "no compiled classes"),
+                Some(classes) => match spotbugs::analyze(classes, &out_dir) {
+                    Ok(found) => report.ok("SpotBugs", found),
+                    Err(e) => report.failed("SpotBugs", e),
+                },
+            }
+        }
     }
 
-    match &deps {
-        None => report.skipped("Dependency-Check", "no libraries to analyze"),
-        Some(deps) => match dependency_check::analyze(deps, &out_dir, &project_name(input)) {
-            Ok(found) => report.ok("Dependency-Check", found),
-            Err(e) => report.failed("Dependency-Check", e),
-        },
+    if use_depcheck {
+        if let Some(reason) = not_ready(dependency_check::check()) {
+            report.skipped("Dependency-Check", &reason);
+        } else {
+            match &deps {
+                None => report.skipped("Dependency-Check", "no libraries to analyze"),
+                Some(deps) => match dependency_check::analyze(deps, &out_dir, &project_name(input)) {
+                    Ok(found) => report.ok("Dependency-Check", found),
+                    Err(e) => report.failed("Dependency-Check", e),
+                },
+            }
+        }
     }
 
     report.findings.sort_by_key(|f| (!f.security, f.severity));
     report
 }
+
+fn not_ready(checks: Vec<ToolCheck>) -> Option<String> {
+    checks
+        .into_iter()
+        .find(|check| !check.ok)
+        .map(|check| format!("{}: {}", check.name, check.detail))
+}
+
+fn is_jar(path: &Path) -> bool {
+    path.is_file() && path.extension().is_some_and(|e| e == "jar")
+}
+
+fn project_name(input: &Path) -> String {
+    input
+        .file_stem()
+        .and_then(|name| name.to_str())
+        .unwrap_or("project")
+        .to_string()
+}
+
+/*
+    Tests
+*/
 
 #[cfg(test)]
 mod tests {
@@ -162,8 +189,8 @@ mod tests {
 
     #[test]
     fn non_scambia_cartelle_per_jar() {
-        assert!(!is_jar(Path::new("libreria.jar"))); // non esiste: non è un file
-        assert!(!is_jar(Path::new("."))); // è una cartella
+        assert!(!is_jar(Path::new("libreria.jar")));
+        assert!(!is_jar(Path::new(".")));
     }
 
     #[test]
@@ -173,8 +200,29 @@ mod tests {
     }
 
     #[test]
+    fn primo_strumento_non_pronto() {
+        let checks = vec![
+            ToolCheck {
+                tool: "x".to_string(),
+                name: "A".to_string(),
+                ok: true,
+                detail: "1.0".to_string(),
+            },
+            ToolCheck {
+                tool: "x".to_string(),
+                name: "B".to_string(),
+                ok: false,
+                detail: "not found".to_string(),
+            },
+        ];
+        assert_eq!(not_ready(checks), Some("B: not found".to_string()));
+        assert_eq!(not_ready(Vec::new()), None);
+    }
+
+    #[test]
     fn build_fallita_non_blocca_il_report() {
-        let report = scan(Path::new("."));
+        let all = ["spotbugs".to_string(), "dependency-check".to_string()];
+        let report = scan(Path::new("."), &all);
         let status: Vec<&StepStatus> = report.steps.iter().map(|s| &s.status).collect();
         assert_eq!(
             status,
@@ -186,5 +234,19 @@ mod tests {
             ]
         );
         assert!(report.findings.is_empty());
+    }
+
+    #[test]
+    fn nessuno_strumento_scelto() {
+        let report = scan(Path::new("."), &[]);
+        assert!(report.steps.is_empty());
+    }
+
+    #[test]
+    fn solo_dependency_check_non_compila() {
+        let only = ["dependency-check".to_string()];
+        let report = scan(Path::new("."), &only);
+        let names: Vec<&str> = report.steps.iter().map(|s| s.name.as_str()).collect();
+        assert_eq!(names, ["Copy dependencies", "Dependency-Check"]);
     }
 }

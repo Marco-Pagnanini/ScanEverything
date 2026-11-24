@@ -7,7 +7,6 @@ use porting::parsers::sarif::parse_sarif_to_finding;
 use porting::pipeline::{self, ScanReport};
 use porting::process::ToolCheck;
 
-/// Legge un file di finding già pronto (JSON di prova o SARIF).
 #[tauri::command]
 fn load_findings(path: String) -> Result<Vec<Finding>, String> {
     let text = std::fs::read_to_string(&path)
@@ -23,7 +22,6 @@ fn load_findings(path: String) -> Result<Vec<Finding>, String> {
     Ok(findings)
 }
 
-/// Stato di Maven, SpotBugs e del plugin.
 #[tauri::command]
 async fn check_tools() -> Vec<ToolCheck> {
     tauri::async_runtime::spawn_blocking(pipeline::check_tools)
@@ -31,10 +29,9 @@ async fn check_tools() -> Vec<ToolCheck> {
         .unwrap_or_default()
 }
 
-/// Pipeline su una cartella Maven o su un .jar: un esito per ogni step.
 #[tauri::command]
-async fn scan_project(input: String) -> Result<ScanReport, String> {
-    tauri::async_runtime::spawn_blocking(move || pipeline::scan(Path::new(&input)))
+async fn scan_project(input: String, tools: Vec<String>) -> Result<ScanReport, String> {
+    tauri::async_runtime::spawn_blocking(move || pipeline::scan(Path::new(&input), &tools))
         .await
         .map_err(|e| format!("Internal error: {e}"))
 }
