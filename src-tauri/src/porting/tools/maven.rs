@@ -4,7 +4,7 @@ use crate::porting::process::{ToolCheck, check_tool, last_lines, run};
 
 /// Controlla che Maven sia installato.
 pub fn check() -> ToolCheck {
-    check_tool("maven", "Maven", "mvn", "-version")
+        check_tool("maven", "Maven", "mvn", &["-version"])
 }
 
 fn mvn(project: &Path, args: &[&str]) -> Result<(), String> {

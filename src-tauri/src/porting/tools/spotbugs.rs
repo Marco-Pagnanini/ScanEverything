@@ -35,7 +35,7 @@ pub fn check() -> Vec<ToolCheck> {
         },
     };
 
-    vec![check_tool("spotbugs", "SpotBugs", "spotbugs", "-version"), plugin]
+        vec![check_tool("spotbugs", "SpotBugs", "spotbugs", &["-version"]), plugin]
 }
 
 pub fn analyze(classes: &Path, out_dir: &Path) -> Result<Vec<Finding>, String> {

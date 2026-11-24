@@ -1,0 +1,26 @@
+id = "spotbugs"
+name = "SpotBugs"
+kind = "static"
+description = "Finds bugs and security problems in compiled Java classes (with Find Security Bugs)."
+
+[check]
+program = "spotbugs"
+args = ["-version"]
+files = ["{home}/tools/findsecbugs-plugin-1.14.0.jar"]
+
+[run]
+program = "spotbugs"
+args = [
+    "-textui",
+    "-effort:max",
+    "-low",
+    "-pluginList",
+    "{home}/tools/findsecbugs-plugin-1.14.0.jar",
+    "-sarif={out}/spotbugs.sarif",
+    "{classes}",
+]
+needs = ["classes"]
+
+[output]
+file = "spotbugs.sarif"
+format = "sarif"

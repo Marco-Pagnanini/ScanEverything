@@ -27,7 +27,7 @@ pub fn check() -> Vec<ToolCheck> {
     };
 
     vec![
-        check_tool("dependency-check", "Dependency-Check", "dependency-check", "--version"),
+                check_tool("dependency-check", "Dependency-Check", "dependency-check", &["--version"]),
         key,
     ]
 }

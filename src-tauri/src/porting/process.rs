@@ -38,8 +38,19 @@ pub struct ToolCheck {
     pub detail: String,
 }
 
-pub fn check_tool(tool: &str, name: &str, program: &str, version_arg: &str) -> ToolCheck {
-    match run(program, &[version_arg], Path::new(".")) {
+impl ToolCheck {
+    pub fn new(tool: &str, name: &str, ok: bool, detail: impl Into<String>) -> Self {
+        ToolCheck {
+            tool: tool.to_string(),
+            name: name.to_string(),
+            ok,
+            detail: detail.into(),
+        }
+    }
+}
+
+pub fn check_tool(tool: &str, name: &str, program: &str, args: &[&str]) -> ToolCheck {
+    match run(program, args, Path::new(".")) {
         Ok(out) if out.code == Some(0) => ToolCheck {
             tool: tool.to_string(),
             name: name.to_string(),
@@ -85,7 +96,7 @@ mod tests {
 
     #[test]
     fn programma_inesistente() {
-        let check = check_tool("fake", "Fake", "programma-che-non-esiste-123", "-version");
+        let check = check_tool("fake", "Fake", "programma-che-non-esiste-123", &["-version"]);
         assert!(!check.ok);
         assert!(check.detail.contains("non trovato"));
     }

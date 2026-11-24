@@ -1,0 +1,25 @@
+id = "dependency-check"
+name = "Dependency-Check"
+kind = "static"
+description = "Finds libraries with known vulnerabilities (CVE) in the project dependencies."
+
+[check]
+program = "dependency-check"
+args = ["--version"]
+env = ["NVD_API_KEY"]
+
+[run]
+program = "dependency-check"
+args = [
+    "--project", "{name}",
+    "--scan", "{dependencies}",
+    "--format", "SARIF",
+    "--out", "{out}",
+    "--nvdApiKey", "{env:NVD_API_KEY}",
+    "--disableOssIndex",
+]
+needs = ["dependencies"]
+
+[output]
+file = "dependency-check-report.sarif"
+format = "sarif"
