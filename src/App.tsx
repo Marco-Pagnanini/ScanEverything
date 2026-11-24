@@ -9,9 +9,12 @@ type Finding = {
     tool: string;
     rule: string;
     title: string;
+    description: string | null;
     severity: Severity;
     security: boolean;
     cwe: string | null;
+    cve: string | null;
+    package: string | null;
     file: string | null;
     line: number | null;
 };
@@ -105,8 +108,9 @@ function App() {
                         [{f.severity}] {f.title}
                         {f.cwe && ` · ${f.cwe}`}
                         {" — "}
-                        {f.file ? `${f.file}:${f.line ?? ""}` : "(nessun file)"}
-                        {` (${f.tool} · ${f.rule})`}
+                        {f.package
+                            ? `${f.package} (${f.file ?? ""})`
+                            : f.file ? `${f.file}:${f.line ?? ""}` : "(nessun file)"}
                     </li>
                 ))}
             </ul>

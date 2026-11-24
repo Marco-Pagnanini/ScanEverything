@@ -1,0 +1,778 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "dependency-check",
+          "version": "13.0.0",
+          "informationUri": "https://dependency-check.github.io/DependencyCheck/",
+        "rules": [
+{
+              "id": "CVE-2021-45046",
+              "shortDescription": {
+                 "text": "critical severity - CVE-2021-45046 Improper Neutralization of Special Elements used in an Expression Language Statement ('Expression Language Injection') vulnerability in pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1 *Known Exploited Vulnerability*"
+              },
+              "fullDescription": {
+                "text": "CISA Known Exploited Vulnerability\nVendor\/Project: Apache\nProduct: Log4j2\nVulnerability Name: Apache Log4j2 Deserialization of Untrusted Data Vulnerability\nDate Added: 2023-05-01\nShort Description: Apache Log4j2 contains a deserialization of untrusted data vulnerability due to the incomplete fix of CVE-2021-44228, where the Thread Context Lookup Pattern is vulnerable to remote code execution in certain non-default configurations.\nRequired Action: Apply updates per vendor instructions.\nDue Date2023-05-22\nNotes: https:\/\/logging.apache.org\/log4j\/2.x\/security.html; https:\/\/nvd.nist.gov\/vuln\/detail\/CVE-2021-45046\n\nIt was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. This could allows attackers with control over Thread Context Map (MDC) input data when the logging configuration uses a non-default Pattern Layout with either a Context Lookup (for example, $${ctx:loginId}) or a Thread Context Map pattern (%X, %mdc, or %MDC) to craft malicious input data using a JNDI Lookup pattern resulting in an information leak and remote code execution in some environments and local code execution in all environments. Log4j 2.16.0 (Java 8) and 2.12.2 (Java 7) fix this issue by removing support for message lookup patterns and disabling JNDI functionality by default."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2021-45046](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2021-45046).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv2_score": 5.1,
+                    "cvssv2_accessVector": "NETWORK",
+                    "cvssv2_accessComplexity": "HIGH",
+                    "cvssv2_authenticationr": "NONE",
+                    "cvssv2_confidentialityImpact": "PARTIAL",
+                    "cvssv2_integrityImpact": "PARTIAL",
+                    "cvssv2_availabilityImpact": "PARTIAL",
+                    "cvssv2_severity": "MEDIUM",
+                    "cvssv3_baseScore": 9.0,
+                    "security-severity": "9.0",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "HIGH",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "CHANGED",
+                    "cvssv3_confidentialityImpact": "HIGH",
+                    "cvssv3_integrityImpact": "HIGH",
+                    "cvssv3_availabilityImpact": "HIGH",
+                    "cvssv3_baseSeverity": "CRITICAL",
+"cvssv3_exploitabilityScore": "2.2","cvssv3_impactScore": "6.0","cvssv3_version": "_3_1",                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2022-42889",
+              "shortDescription": {
+                 "text": "critical severity - CVE-2022-42889 Improper Control of Generation of Code ('Code Injection') vulnerability in pkg:maven\/org.apache.commons\/commons-text@1.9"
+              },
+              "fullDescription": {
+                "text": "Apache Commons Text performs variable interpolation, allowing properties to be dynamically evaluated and expanded. The standard format for interpolation is \"${prefix:name}\", where \"prefix\" is used to locate an instance of org.apache.commons.text.lookup.StringLookup that performs the interpolation. Starting with version 1.5 and continuing through 1.9, the set of default Lookup instances included interpolators that could result in arbitrary code execution or contact with remote servers. These lookups are: - \"script\" - execute expressions using the JVM script execution engine (javax.script) - \"dns\" - resolve dns records - \"url\" - load values from urls, including from remote servers Applications using the interpolation defaults in the affected versions may be vulnerable to remote code execution or unintentional contact with remote servers if untrusted configuration values are used. Users are recommended to upgrade to Apache Commons Text 1.10.0, which disables the problematic interpolators by default."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2022-42889](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2022-42889).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv3_baseScore": 9.8,
+                    "security-severity": "9.8",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "LOW",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "UNCHANGED",
+                    "cvssv3_confidentialityImpact": "HIGH",
+                    "cvssv3_integrityImpact": "HIGH",
+                    "cvssv3_availabilityImpact": "HIGH",
+                    "cvssv3_baseSeverity": "CRITICAL",
+"cvssv3_exploitabilityScore": "3.9","cvssv3_impactScore": "5.9","cvssv3_version": "_3_1",                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2026-34480",
+              "shortDescription": {
+                 "text": "medium severity - CVE-2026-34480 Improper Encoding or Escaping of Output vulnerability in pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+              },
+              "fullDescription": {
+                "text": "Apache Log4j Core's  XmlLayout https:\/\/logging.apache.org\/log4j\/2.x\/manual\/layouts.html#XmlLayout , in versions up to and including 2.25.3, fails to sanitize characters forbidden by the  XML 1.0 specification https:\/\/www.w3.org\/TR\/xml\/#charsets  producing invalid XML output whenever a log message or MDC value contains such characters.\n\nThe impact depends on the StAX implementation in use:\n\n  *  JRE built-in StAX: Forbidden characters are silently written to the output, producing malformed XML. Conforming parsers must reject such documents with a fatal error, which may cause downstream log-processing systems to drop the affected records.\n  *  Alternative StAX implementations (e.g.,  Woodstox https:\/\/github.com\/FasterXML\/woodstox , a transitive dependency of the Jackson XML Dataformat module): An exception is thrown during the logging call, and the log event is never delivered to its intended appender, only to Log4j's internal status logger.\n\n\nUsers are advised to upgrade to Apache Log4j Core 2.25.4, which corrects this issue by sanitizing forbidden characters before XML output."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2026-34480](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2026-34480).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv3_baseScore": 7.5,
+                    "security-severity": "7.5",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "LOW",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "UNCHANGED",
+                    "cvssv3_confidentialityImpact": "NONE",
+                    "cvssv3_integrityImpact": "HIGH",
+                    "cvssv3_availabilityImpact": "NONE",
+                    "cvssv3_baseSeverity": "HIGH",
+"cvssv3_exploitabilityScore": "3.9","cvssv3_impactScore": "3.6","cvssv3_version": "_3_1",                "cvssv4_baseScore": 6.9,
+                "security-severity": "6.9",
+                "cvssv4_vector": "CVSS:4.0\/AV:N\/AC:L\/AT:N\/PR:N\/UI:N\/VC:N\/VI:N\/VA:N\/SC:N\/SI:L\/SA:N\/E:X\/CR:X\/IR:X\/AR:X\/MAV:X\/MAC:X\/MAT:X\/MPR:X\/MUI:X\/MVC:X\/MVI:X\/MVA:X\/MSC:X\/MSI:X\/MSA:X\/S:X\/AU:X\/R:X\/V:X\/RE:X\/U:X",
+                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2026-34479",
+              "shortDescription": {
+                 "text": "medium severity - CVE-2026-34479 Improper Encoding or Escaping of Output vulnerability in pkg:maven\/org.apache.logging.log4j\/log4j-api@2.14.1"
+              },
+              "fullDescription": {
+                "text": "The Log4j1XmlLayout from the Apache Log4j 1-to-Log4j 2 bridge fails to escape characters forbidden by the XML 1.0 standard, producing malformed XML output. Conforming XML parsers are required to reject documents containing such characters with a fatal error, which may cause downstream log processing systems to drop or fail to index affected records.\n\nTwo groups of users are affected:\n\n  *  Those using Log4j1XmlLayout directly in a Log4j Core 2 configuration file.\n  *  Those using the Log4j 1 configuration compatibility layer with org.apache.log4j.xml.XMLLayout specified as the layout class.\n\n\nUsers are advised to upgrade to Apache Log4j 1-to-Log4j 2 bridge version 2.25.4, which corrects this issue.\n\nNote: The Apache Log4j 1-to-Log4j 2 bridge is deprecated and will not be present in Log4j 3. Users are encouraged to consult the  Log4j 1 to Log4j 2 migration guide https:\/\/logging.apache.org\/log4j\/2.x\/migrate-from-log4j1.html , and specifically the section on eliminating reliance on the bridge."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2026-34479](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2026-34479).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv3_baseScore": 7.5,
+                    "security-severity": "7.5",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "LOW",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "UNCHANGED",
+                    "cvssv3_confidentialityImpact": "NONE",
+                    "cvssv3_integrityImpact": "HIGH",
+                    "cvssv3_availabilityImpact": "NONE",
+                    "cvssv3_baseSeverity": "HIGH",
+"cvssv3_exploitabilityScore": "3.9","cvssv3_impactScore": "3.6","cvssv3_version": "_3_1",                "cvssv4_baseScore": 6.9,
+                "security-severity": "6.9",
+                "cvssv4_vector": "CVSS:4.0\/AV:N\/AC:L\/AT:N\/PR:N\/UI:N\/VC:N\/VI:N\/VA:N\/SC:N\/SI:L\/SA:N\/E:X\/CR:X\/IR:X\/AR:X\/MAV:X\/MAC:X\/MAT:X\/MPR:X\/MUI:X\/MVC:X\/MVI:X\/MVA:X\/MSC:X\/MSI:X\/MSA:X\/S:X\/AU:X\/R:X\/V:X\/RE:X\/U:X",
+                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2026-34477",
+              "shortDescription": {
+                 "text": "medium severity - CVE-2026-34477 Improper Certificate Validation vulnerability in pkg:maven\/org.apache.logging.log4j\/log4j-api@2.14.1"
+              },
+              "fullDescription": {
+                "text": "The fix for  CVE-2025-68161 https:\/\/logging.apache.org\/security.html#CVE-2025-68161  was incomplete: it addressed hostname verification only when enabled via the  log4j2.sslVerifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/systemproperties.html#log4j2.sslVerifyHostName  system property, but not when configured through the  verifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/appenders\/network.html#SslConfiguration-attr-verifyHostName  attribute of the <Ssl> element.\n\nAlthough the verifyHostName configuration attribute was introduced in Log4j Core 2.12.0, it was silently ignored in all versions through 2.25.3, leaving TLS connections vulnerable to interception regardless of the configured value.\n\nA network-based attacker may be able to perform a man-in-the-middle attack when all of the following conditions are met:\n\n  *  An SMTP, Socket, or Syslog appender is in use.\n  *  TLS is configured via a nested <Ssl> element.\n  *  The attacker can present a certificate issued by a CA trusted by the appender's configured trust store, or by the default Java trust store if none is configured.\nThis issue does not affect users of the HTTP appender, which uses a separate  verifyHostname https:\/\/logging.apache.org\/log4j\/2.x\/manual\/appenders\/network.html#HttpAppender-attr-verifyHostName  attribute that was not subject to this bug and verifies host names by default.\n\nUsers are advised to upgrade to Apache Log4j Core 2.25.4, which corrects this issue."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2026-34477](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2026-34477).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv3_baseScore": 5.9,
+                    "security-severity": "5.9",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "HIGH",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "UNCHANGED",
+                    "cvssv3_confidentialityImpact": "NONE",
+                    "cvssv3_integrityImpact": "HIGH",
+                    "cvssv3_availabilityImpact": "NONE",
+                    "cvssv3_baseSeverity": "MEDIUM",
+"cvssv3_exploitabilityScore": "2.2","cvssv3_impactScore": "3.6","cvssv3_version": "_3_1",                "cvssv4_baseScore": 6.3,
+                "security-severity": "6.3",
+                "cvssv4_vector": "CVSS:4.0\/AV:N\/AC:H\/AT:N\/PR:N\/UI:N\/VC:L\/VI:N\/VA:N\/SC:N\/SI:L\/SA:N\/E:X\/CR:X\/IR:X\/AR:X\/MAV:X\/MAC:X\/MAT:X\/MPR:X\/MUI:X\/MVC:X\/MVI:X\/MVA:X\/MSC:X\/MSI:X\/MSA:X\/S:X\/AU:X\/R:X\/V:X\/RE:X\/U:X",
+                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2026-49844",
+              "shortDescription": {
+                 "text": "medium severity - CVE-2026-49844 Improper Encoding or Escaping of Output vulnerability in pkg:maven\/org.apache.logging.log4j\/log4j-api@2.14.1"
+              },
+              "fullDescription": {
+                "text": "Improper encoding of non-finite floating-point values during MapMessage JSON serialization in Apache Log4j API produces output that is not valid JSON. This issue affects Apache Log4j API versions 2.13.1 through 2.25.4 and version 2.26.0.\n\nThe fix for CVE-2026-34481 did not cover all code paths: when a MapMessage contains a non-finite IEEE 754 value (NaN, Infinity, or -Infinity), MapMessage.asJson() emits the corresponding bare token. RFC 8259 does not permit these tokens, so a conformant parser rejects the resulting document.\n\nThe defect is reachable only when both of the following conditions hold:\n\n  *  The application uses the  message resolver https:\/\/logging.apache.org\/log4j\/2.x\/manual\/json-template-layout.html#event-template-resolver-message  of JsonTemplateLayout or any other layout that relies on MapMessage.asJson() or MapMessage.getFormattedMessage(new String[]{\"JSON\"}).\n  *  The application logs a MapMessage that contains an attacker-controlled floating-point value.\n\n\nAn attacker who can supply a non-finite value can cause the affected layout to emit malformed JSON, which may corrupt the enclosing log record or disrupt downstream log ingestion and parsing.\n\nUsers are advised to upgrade to Apache Log4j API 2.25.5 or 2.26.1, both of which emit RFC 8259-compliant JSON for non-finite values."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2026-49844](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2026-49844).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv3_baseScore": 5.9,
+                    "security-severity": "5.9",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "HIGH",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "UNCHANGED",
+                    "cvssv3_confidentialityImpact": "NONE",
+                    "cvssv3_integrityImpact": "HIGH",
+                    "cvssv3_availabilityImpact": "NONE",
+                    "cvssv3_baseSeverity": "MEDIUM",
+"cvssv3_exploitabilityScore": "2.2","cvssv3_impactScore": "3.6","cvssv3_version": "_3_1",                "cvssv4_baseScore": 6.3,
+                "security-severity": "6.3",
+                "cvssv4_vector": "CVSS:4.0\/AV:N\/AC:L\/AT:P\/PR:N\/UI:N\/VC:N\/VI:N\/VA:N\/SC:N\/SI:L\/SA:N\/E:X\/CR:X\/IR:X\/AR:X\/MAV:X\/MAC:X\/MAT:X\/MPR:X\/MUI:X\/MVC:X\/MVI:X\/MVA:X\/MSC:X\/MSI:X\/MSA:X\/S:X\/AU:X\/R:X\/V:X\/RE:X\/U:X",
+                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2025-68161",
+              "shortDescription": {
+                 "text": "medium severity - CVE-2025-68161 Improper Certificate Validation vulnerability in pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+              },
+              "fullDescription": {
+                "text": "The Socket Appender in Apache Log4j Core versions 2.0-beta9 through 2.25.2 does not perform TLS hostname verification of the peer certificate, even when the  verifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/appenders\/network.html#SslConfiguration-attr-verifyHostName  configuration attribute or the  log4j2.sslVerifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/systemproperties.html#log4j2.sslVerifyHostName  system property is set to true.\n\nThis issue may allow a man-in-the-middle attacker to intercept or redirect log traffic under the following conditions:\n\n  *  The attacker is able to intercept or redirect network traffic between the client and the log receiver.\n  *  The attacker can present a server certificate issued by a certification authority trusted by the Socket Appender\u2019s configured trust store (or by the default Java trust store if no custom trust store is configured).\n\n\nUsers are advised to upgrade to Apache Log4j Core version 2.25.3, which addresses this issue.\n\nAs an alternative mitigation, the Socket Appender may be configured to use a private or restricted trust root to limit the set of trusted certificates."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2025-68161](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2025-68161).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv3_baseScore": 4.8,
+                    "security-severity": "4.8",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "HIGH",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "UNCHANGED",
+                    "cvssv3_confidentialityImpact": "LOW",
+                    "cvssv3_integrityImpact": "LOW",
+                    "cvssv3_availabilityImpact": "NONE",
+                    "cvssv3_baseSeverity": "MEDIUM",
+"cvssv3_exploitabilityScore": "2.2","cvssv3_impactScore": "2.5","cvssv3_version": "_3_1",                "cvssv4_baseScore": 6.3,
+                "security-severity": "6.3",
+                "cvssv4_vector": "CVSS:4.0\/AV:N\/AC:H\/AT:N\/PR:N\/UI:N\/VC:L\/VI:N\/VA:N\/SC:N\/SI:L\/SA:N\/E:X\/CR:X\/IR:X\/AR:X\/MAV:X\/MAC:X\/MAT:X\/MPR:X\/MUI:X\/MVC:X\/MVI:X\/MVA:X\/MSC:X\/MSI:X\/MSA:X\/S:X\/AU:X\/R:X\/V:X\/RE:X\/U:X",
+                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2021-45105",
+              "shortDescription": {
+                 "text": "medium severity - CVE-2021-45105 Improper Input Validation vulnerability in pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+              },
+              "fullDescription": {
+                "text": "Apache Log4j2 versions 2.0-alpha1 through 2.16.0 (excluding 2.12.3 and 2.3.1) did not protect from uncontrolled recursion from self-referential lookups. This allows an attacker with control over Thread Context Map data to cause a denial of service when a crafted string is interpreted. This issue was fixed in Log4j 2.17.0, 2.12.3, and 2.3.1."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2021-45105](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2021-45105).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv2_score": 4.3,
+                    "cvssv2_accessVector": "NETWORK",
+                    "cvssv2_accessComplexity": "MEDIUM",
+                    "cvssv2_authenticationr": "NONE",
+                    "cvssv2_confidentialityImpact": "NONE",
+                    "cvssv2_integrityImpact": "NONE",
+                    "cvssv2_availabilityImpact": "PARTIAL",
+                    "cvssv2_severity": "MEDIUM",
+                    "cvssv3_baseScore": 5.9,
+                    "security-severity": "5.9",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "HIGH",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "UNCHANGED",
+                    "cvssv3_confidentialityImpact": "NONE",
+                    "cvssv3_integrityImpact": "NONE",
+                    "cvssv3_availabilityImpact": "HIGH",
+                    "cvssv3_baseSeverity": "MEDIUM",
+"cvssv3_exploitabilityScore": "2.2","cvssv3_impactScore": "3.6","cvssv3_version": "_3_1",                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2025-48924",
+              "shortDescription": {
+                 "text": "medium severity - CVE-2025-48924 Uncontrolled Recursion vulnerability in pkg:maven\/org.apache.commons\/commons-lang3@3.11"
+              },
+              "fullDescription": {
+                "text": "Uncontrolled Recursion vulnerability in Apache Commons Lang.\n\nThis issue affects Apache Commons Lang: Starting with\u00A0commons-lang:commons-lang\u00A02.0 to 2.6, and, from org.apache.commons:commons-lang3 3.0 before\u00A03.18.0.\n\nThe methods ClassUtils.getClass(...) can throw\u00A0StackOverflowError on very long inputs. Because an Error is usually not handled by applications and libraries, a \nStackOverflowError could\u00A0cause an application to stop.\n\nUsers are recommended to upgrade to version 3.18.0, which fixes the issue."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2025-48924](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2025-48924).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv3_baseScore": 5.3,
+                    "security-severity": "5.3",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "LOW",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "UNCHANGED",
+                    "cvssv3_confidentialityImpact": "NONE",
+                    "cvssv3_integrityImpact": "NONE",
+                    "cvssv3_availabilityImpact": "LOW",
+                    "cvssv3_baseSeverity": "MEDIUM",
+"cvssv3_exploitabilityScore": "3.9","cvssv3_impactScore": "1.4","cvssv3_version": "_3_1",                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2021-44228",
+              "shortDescription": {
+                 "text": "critical severity - CVE-2021-44228 Uncontrolled Resource Consumption vulnerability in pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1 *Known Exploited Vulnerability*"
+              },
+              "fullDescription": {
+                "text": "CISA Known Exploited Vulnerability\nVendor\/Project: Apache\nProduct: Log4j2\nVulnerability Name: Apache Log4j2 Remote Code Execution Vulnerability\nDate Added: 2021-12-10\nShort Description: Apache Log4j2 contains a vulnerability where JNDI features do not protect against attacker-controlled JNDI-related endpoints, allowing for remote code execution.\nRequired Action: For all affected software assets for which updates exist, the only acceptable remediation actions are: 1) Apply updates; OR 2) remove affected assets from agency networks. Temporary mitigations using one of the measures provided at https:\/\/www.cisa.gov\/uscert\/ed-22-02-apache-log4j-recommended-mitigation-measures are only acceptable until updates are available.\nDue Date2021-12-24\nNotes: https:\/\/nvd.nist.gov\/vuln\/detail\/CVE-2021-44228\n\nApache Log4j2 2.0-beta9 through 2.15.0 (excluding security releases 2.12.2, 2.12.3, and 2.3.1) JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled. From log4j 2.15.0, this behavior has been disabled by default. From version 2.16.0 (along with 2.12.2, 2.12.3, and 2.3.1), this functionality has been completely removed. Note that this vulnerability is specific to log4j-core and does not affect log4net, log4cxx, or other Apache Logging Services projects."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2021-44228](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2021-44228).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv2_score": 9.3,
+                    "cvssv2_accessVector": "NETWORK",
+                    "cvssv2_accessComplexity": "MEDIUM",
+                    "cvssv2_authenticationr": "NONE",
+                    "cvssv2_confidentialityImpact": "COMPLETE",
+                    "cvssv2_integrityImpact": "COMPLETE",
+                    "cvssv2_availabilityImpact": "COMPLETE",
+                    "cvssv2_severity": "HIGH",
+                    "cvssv3_baseScore": 10.0,
+                    "security-severity": "10.0",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "LOW",
+                    "cvssv3_privilegesRequired": "NONE",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "CHANGED",
+                    "cvssv3_confidentialityImpact": "HIGH",
+                    "cvssv3_integrityImpact": "HIGH",
+                    "cvssv3_availabilityImpact": "HIGH",
+                    "cvssv3_baseSeverity": "CRITICAL",
+"cvssv3_exploitabilityScore": "3.9","cvssv3_impactScore": "6.0","cvssv3_version": "_3_1",                "source": "NVD"
+              }
+            },{
+              "id": "CVE-2021-44832",
+              "shortDescription": {
+                 "text": "medium severity - CVE-2021-44832 Improper Input Validation vulnerability in pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+              },
+              "fullDescription": {
+                "text": "Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2."
+              },
+              "help": {
+                "text": "",
+                "markdown": "For more information see [CVE-2021-44832](https://web.nvd.nist.gov/view/vuln/detail?vulnId=CVE-2021-44832).\n\n\nIf this is a false positive - consider using the HTML report to generate a suppression file.\nFor more information see [How dependency-check works](https://dependency-check.github.io/DependencyCheck/general/internals.html),\n[How to read the HTML report](https://dependency-check.github.io/DependencyCheck/general/thereport.html), and\n[Suppressing false positives](https://dependency-check.github.io/DependencyCheck/general/suppression.html)."
+              },
+              "properties": {
+                    "cvssv2_score": 8.5,
+                    "cvssv2_accessVector": "NETWORK",
+                    "cvssv2_accessComplexity": "MEDIUM",
+                    "cvssv2_authenticationr": "SINGLE",
+                    "cvssv2_confidentialityImpact": "COMPLETE",
+                    "cvssv2_integrityImpact": "COMPLETE",
+                    "cvssv2_availabilityImpact": "COMPLETE",
+                    "cvssv2_severity": "HIGH",
+                    "cvssv3_baseScore": 6.6,
+                    "security-severity": "6.6",
+                    "cvssv3_attackVector": "NETWORK",
+                    "cvssv3_attackComplexity": "HIGH",
+                    "cvssv3_privilegesRequired": "HIGH",
+                    "cvssv3_userInteraction": "NONE",
+                    "cvssv3_scope": "UNCHANGED",
+                    "cvssv3_confidentialityImpact": "HIGH",
+                    "cvssv3_integrityImpact": "HIGH",
+                    "cvssv3_availabilityImpact": "HIGH",
+                    "cvssv3_baseSeverity": "MEDIUM",
+"cvssv3_exploitabilityScore": "0.7","cvssv3_impactScore": "5.9","cvssv3_version": "_3_1",                "source": "NVD"
+              }
+            }          ],
+        "properties": {
+          "disclaimer": "Dependency-Check is an open source tool performing a best effort analysis of 3rd party dependencies; false positives and false negatives may exist in the analysis performed by the tool. Use of the tool and the reporting provided constitutes acceptance for use in an AS IS condition, and there are NO warranties, implied or otherwise, with regard to the analysis or its use. Any use of the tool and the reporting provided is at the user's risk. In no event shall the copyright holder or OWASP be held liable for any damages whatsoever arising out of or in connection with the use of this tool, the analysis performed, or the resulting report.",
+          "nvd": "This product uses the NVD API but is not endorsed or certified by the NVD. This report contains data retrieved from the National Vulnerability Database: https://nvd.nist.gov",
+          "cisa": "This report may contain data retrieved from the CISA Known Exploited Vulnerability Catalog: https://www.cisa.gov/known-exploited-vulnerabilities-catalog",
+          "npm": "This report may contain data retrieved from the the Github Advisory Database (via NPM Audit API): https://github.com/advisories/",
+          "retirejs": "This report may contain data retrieved from the RetireJS community: https://retirejs.github.io/retire.js/",
+          "ossindex": "This report may contain data retrieved from the Sonatype Guide OSS Index API: https://www.sonatype.com/products/sonatype-guide/oss-index-users"
+            ,"NVD API Last Checked": "2026-11-24T14:11:42+01"
+            ,"NVD API Last Modified": "2026-11-24T13:10:03Z"
+          }
+        }
+      },
+      "artifacts": [
+{
+          "description": {
+             "text": "\n  Apache Commons Lang, a package of Java utility classes for the\n  classes that are in java.lang's hierarchy, or are considered to be so\n  standard as to justify existence in java.lang.\n  "
+          },
+          "location": {
+            "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/commons-lang3-3.11.jar"
+          },
+          "hashes": {
+            "md5": "c592f49f703f9b3ab25556559b1ff379",
+            "sha1": "68e9a6adf7cf8eb7e9d31bbc554c7c75eeaac568",
+            "sha256": "4ee380259c068d1dbe9e84ab52186f2acd65de067ec09beff731fca1697fdb16"
+          },          "properties": {
+"license": "https:\/\/www.apache.org\/licenses\/LICENSE-2.0.txt",                    "id1": "pkg:maven\/org.apache.commons\/commons-lang3@3.11"
+,                    "vid1": "cpe:2.3:a:apache:commons_lang:3.11:*:*:*:*:*:*:*"
+          }
+        }
+,{
+          "description": {
+             "text": "Apache Commons Text is a library focused on algorithms working on strings."
+          },
+          "location": {
+            "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/commons-text-1.9.jar"
+          },
+          "hashes": {
+            "md5": "c1c130c369aa86bfe4f7a7a920bc0223",
+            "sha1": "ba6ac8c2807490944a0a27f6f8e68fb5ed2e80e2",
+            "sha256": "0812f284ac5dd0d617461d9a2ab6ac6811137f25122dfffd4788a4871e732d00"
+          },          "properties": {
+"license": "https:\/\/www.apache.org\/licenses\/LICENSE-2.0.txt",                    "id2": "pkg:maven\/org.apache.commons\/commons-text@1.9"
+,                    "vid2": "cpe:2.3:a:apache:commons_text:1.9:*:*:*:*:*:*:*"
+          }
+        }
+,{
+          "description": {
+             "text": "The Apache Log4j API"
+          },
+          "location": {
+            "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-api-2.14.1.jar"
+          },
+          "hashes": {
+            "md5": "6f31a3b90c3eb09fb0dc0aef155a001c",
+            "sha1": "cd8858fbbde69f46bce8db1152c18a43328aae78",
+            "sha256": "8caf58db006c609949a0068110395a33067a2bad707c3da35e959c0473f9a916"
+          },          "properties": {
+"license": "https:\/\/www.apache.org\/licenses\/LICENSE-2.0.txt",                    "id3": "pkg:maven\/org.apache.logging.log4j\/log4j-api@2.14.1"
+,                    "vid3": "cpe:2.3:a:apache:log4j:2.14.1:*:*:*:*:*:*:*"
+          }
+        }
+,{
+          "description": {
+             "text": "The Apache Log4j Implementation"
+          },
+          "location": {
+            "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+          },
+          "hashes": {
+            "md5": "948dda787593340a7af1a18e328b7b7f",
+            "sha1": "9141212b8507ab50a45525b545b39d224614528b",
+            "sha256": "ade7402a70667a727635d5c4c29495f4ff96f061f12539763f6f123973b465b0"
+          },          "properties": {
+"license": "https:\/\/www.apache.org\/licenses\/LICENSE-2.0.txt",                    "id4": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+,                    "vid4": "cpe:2.3:a:apache:log4j:2.14.1:*:*:*:*:*:*:*"
+          }
+        }
+      ],
+      "results": [
+ {
+          "ruleId": "CVE-2025-48924",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2025-48924 - Uncontrolled Recursion vulnerability in Apache Commons Lang.\n\nThis issue affects Apache Commons Lang: Starting with\u00A0commons-lang:commons-lang\u00A02.0 to 2.6, and, from org.apache.commons:commons-lang3 3.0 before\u00A03.18.0.\n\nThe methods ClassUtils.getClass(...) can throw\u00A0StackOverflowError on very long inputs. Because an Error is usually not handled by applications and libraries, a \nStackOverflowError could\u00A0cause an application to stop.\n\nUsers are recommended to upgrade to version 3.18.0, which fixes the issue."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "065ac7df188e8c80a7c2979bc5e08183"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/commons-lang3-3.11.jar"
+                  ,"index": 0
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.commons\/commons-lang3@3.11"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2022-42889",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2022-42889 - Apache Commons Text performs variable interpolation, allowing properties to be dynamically evaluated and expanded. The standard format for interpolation is \"${prefix:name}\", where \"prefix\" is used to locate an instance of org.apache.commons.text.lookup.StringLookup that performs the interpolation. Starting with version 1.5 and continuing through 1.9, the set of default Lookup instances included interpolators that could result in arbitrary code execution or contact with remote servers. These lookups are: - \"script\" - execute expressions using the JVM script execution engine (javax.script) - \"dns\" - resolve dns records - \"url\" - load values from urls, including from remote servers Applications using the interpolation defaults in the affected versions may be vulnerable to remote code execution or unintentional contact with remote servers if untrusted configuration values are used. Users are recommended to upgrade to Apache Commons Text 1.10.0, which disables the problematic interpolators by default."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "686a829b76a415162bd80b3f887b75c6"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/commons-text-1.9.jar"
+                  ,"index": 1
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.commons\/commons-text@1.9"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2026-34479",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2026-34479 - The Log4j1XmlLayout from the Apache Log4j 1-to-Log4j 2 bridge fails to escape characters forbidden by the XML 1.0 standard, producing malformed XML output. Conforming XML parsers are required to reject documents containing such characters with a fatal error, which may cause downstream log processing systems to drop or fail to index affected records.\n\nTwo groups of users are affected:\n\n  *  Those using Log4j1XmlLayout directly in a Log4j Core 2 configuration file.\n  *  Those using the Log4j 1 configuration compatibility layer with org.apache.log4j.xml.XMLLayout specified as the layout class.\n\n\nUsers are advised to upgrade to Apache Log4j 1-to-Log4j 2 bridge version 2.25.4, which corrects this issue.\n\nNote: The Apache Log4j 1-to-Log4j 2 bridge is deprecated and will not be present in Log4j 3. Users are encouraged to consult the  Log4j 1 to Log4j 2 migration guide https:\/\/logging.apache.org\/log4j\/2.x\/migrate-from-log4j1.html , and specifically the section on eliminating reliance on the bridge."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "4c39b8ad44c283eb0464b4c941374e84"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-api-2.14.1.jar"
+                  ,"index": 2
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-api@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2026-34477",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2026-34477 - The fix for  CVE-2025-68161 https:\/\/logging.apache.org\/security.html#CVE-2025-68161  was incomplete: it addressed hostname verification only when enabled via the  log4j2.sslVerifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/systemproperties.html#log4j2.sslVerifyHostName  system property, but not when configured through the  verifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/appenders\/network.html#SslConfiguration-attr-verifyHostName  attribute of the <Ssl> element.\n\nAlthough the verifyHostName configuration attribute was introduced in Log4j Core 2.12.0, it was silently ignored in all versions through 2.25.3, leaving TLS connections vulnerable to interception regardless of the configured value.\n\nA network-based attacker may be able to perform a man-in-the-middle attack when all of the following conditions are met:\n\n  *  An SMTP, Socket, or Syslog appender is in use.\n  *  TLS is configured via a nested <Ssl> element.\n  *  The attacker can present a certificate issued by a CA trusted by the appender's configured trust store, or by the default Java trust store if none is configured.\nThis issue does not affect users of the HTTP appender, which uses a separate  verifyHostname https:\/\/logging.apache.org\/log4j\/2.x\/manual\/appenders\/network.html#HttpAppender-attr-verifyHostName  attribute that was not subject to this bug and verifies host names by default.\n\nUsers are advised to upgrade to Apache Log4j Core 2.25.4, which corrects this issue."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "710f6abc9a824373debb03f3c2cb1426"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-api-2.14.1.jar"
+                  ,"index": 2
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-api@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2026-49844",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2026-49844 - Improper encoding of non-finite floating-point values during MapMessage JSON serialization in Apache Log4j API produces output that is not valid JSON. This issue affects Apache Log4j API versions 2.13.1 through 2.25.4 and version 2.26.0.\n\nThe fix for CVE-2026-34481 did not cover all code paths: when a MapMessage contains a non-finite IEEE 754 value (NaN, Infinity, or -Infinity), MapMessage.asJson() emits the corresponding bare token. RFC 8259 does not permit these tokens, so a conformant parser rejects the resulting document.\n\nThe defect is reachable only when both of the following conditions hold:\n\n  *  The application uses the  message resolver https:\/\/logging.apache.org\/log4j\/2.x\/manual\/json-template-layout.html#event-template-resolver-message  of JsonTemplateLayout or any other layout that relies on MapMessage.asJson() or MapMessage.getFormattedMessage(new String[]{\"JSON\"}).\n  *  The application logs a MapMessage that contains an attacker-controlled floating-point value.\n\n\nAn attacker who can supply a non-finite value can cause the affected layout to emit malformed JSON, which may corrupt the enclosing log record or disrupt downstream log ingestion and parsing.\n\nUsers are advised to upgrade to Apache Log4j API 2.25.5 or 2.26.1, both of which emit RFC 8259-compliant JSON for non-finite values."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "ba1a2cad352f5c80025a94d3511f5308"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-api-2.14.1.jar"
+                  ,"index": 2
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-api@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2021-44228",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2021-44228 - Apache Log4j2 2.0-beta9 through 2.15.0 (excluding security releases 2.12.2, 2.12.3, and 2.3.1) JNDI features used in configuration, log messages, and parameters do not protect against attacker controlled LDAP and other JNDI related endpoints. An attacker who can control log messages or log message parameters can execute arbitrary code loaded from LDAP servers when message lookup substitution is enabled. From log4j 2.15.0, this behavior has been disabled by default. From version 2.16.0 (along with 2.12.2, 2.12.3, and 2.3.1), this functionality has been completely removed. Note that this vulnerability is specific to log4j-core and does not affect log4net, log4cxx, or other Apache Logging Services projects."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "2bfa00111c32dc35edaddb47c143c1ef"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+                  ,"index": 3
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2021-45046",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2021-45046 - It was found that the fix to address CVE-2021-44228 in Apache Log4j 2.15.0 was incomplete in certain non-default configurations. This could allows attackers with control over Thread Context Map (MDC) input data when the logging configuration uses a non-default Pattern Layout with either a Context Lookup (for example, $${ctx:loginId}) or a Thread Context Map pattern (%X, %mdc, or %MDC) to craft malicious input data using a JNDI Lookup pattern resulting in an information leak and remote code execution in some environments and local code execution in all environments. Log4j 2.16.0 (Java 8) and 2.12.2 (Java 7) fix this issue by removing support for message lookup patterns and disabling JNDI functionality by default."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "f46441257a7d8ec08af42b1a30aa2e72"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+                  ,"index": 3
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2026-34479",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2026-34479 - The Log4j1XmlLayout from the Apache Log4j 1-to-Log4j 2 bridge fails to escape characters forbidden by the XML 1.0 standard, producing malformed XML output. Conforming XML parsers are required to reject documents containing such characters with a fatal error, which may cause downstream log processing systems to drop or fail to index affected records.\n\nTwo groups of users are affected:\n\n  *  Those using Log4j1XmlLayout directly in a Log4j Core 2 configuration file.\n  *  Those using the Log4j 1 configuration compatibility layer with org.apache.log4j.xml.XMLLayout specified as the layout class.\n\n\nUsers are advised to upgrade to Apache Log4j 1-to-Log4j 2 bridge version 2.25.4, which corrects this issue.\n\nNote: The Apache Log4j 1-to-Log4j 2 bridge is deprecated and will not be present in Log4j 3. Users are encouraged to consult the  Log4j 1 to Log4j 2 migration guide https:\/\/logging.apache.org\/log4j\/2.x\/migrate-from-log4j1.html , and specifically the section on eliminating reliance on the bridge."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "4c39b8ad44c283eb0464b4c941374e84"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+                  ,"index": 3
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2026-34480",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2026-34480 - Apache Log4j Core's  XmlLayout https:\/\/logging.apache.org\/log4j\/2.x\/manual\/layouts.html#XmlLayout , in versions up to and including 2.25.3, fails to sanitize characters forbidden by the  XML 1.0 specification https:\/\/www.w3.org\/TR\/xml\/#charsets  producing invalid XML output whenever a log message or MDC value contains such characters.\n\nThe impact depends on the StAX implementation in use:\n\n  *  JRE built-in StAX: Forbidden characters are silently written to the output, producing malformed XML. Conforming parsers must reject such documents with a fatal error, which may cause downstream log-processing systems to drop the affected records.\n  *  Alternative StAX implementations (e.g.,  Woodstox https:\/\/github.com\/FasterXML\/woodstox , a transitive dependency of the Jackson XML Dataformat module): An exception is thrown during the logging call, and the log event is never delivered to its intended appender, only to Log4j's internal status logger.\n\n\nUsers are advised to upgrade to Apache Log4j Core 2.25.4, which corrects this issue by sanitizing forbidden characters before XML output."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "8bcf16b3fabf414c6c62f1150f0e05cb"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+                  ,"index": 3
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2021-44832",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2021-44832 - Apache Log4j2 versions 2.0-beta7 through 2.17.0 (excluding security fix releases 2.3.2 and 2.12.4) are vulnerable to a remote code execution (RCE) attack when a configuration uses a JDBC Appender with a JNDI LDAP data source URI when an attacker has control of the target LDAP server. This issue is fixed by limiting JNDI data source names to the java protocol in Log4j2 versions 2.17.1, 2.12.4, and 2.3.2."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "24ed1909d2fd6dcd43ca8f2b7f2473ed"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+                  ,"index": 3
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2025-68161",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2025-68161 - The Socket Appender in Apache Log4j Core versions 2.0-beta9 through 2.25.2 does not perform TLS hostname verification of the peer certificate, even when the  verifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/appenders\/network.html#SslConfiguration-attr-verifyHostName  configuration attribute or the  log4j2.sslVerifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/systemproperties.html#log4j2.sslVerifyHostName  system property is set to true.\n\nThis issue may allow a man-in-the-middle attacker to intercept or redirect log traffic under the following conditions:\n\n  *  The attacker is able to intercept or redirect network traffic between the client and the log receiver.\n  *  The attacker can present a server certificate issued by a certification authority trusted by the Socket Appender\u2019s configured trust store (or by the default Java trust store if no custom trust store is configured).\n\n\nUsers are advised to upgrade to Apache Log4j Core version 2.25.3, which addresses this issue.\n\nAs an alternative mitigation, the Socket Appender may be configured to use a private or restricted trust root to limit the set of trusted certificates."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "4198293c09c4a3d0e3ca6224598e3146"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+                  ,"index": 3
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2026-34477",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2026-34477 - The fix for  CVE-2025-68161 https:\/\/logging.apache.org\/security.html#CVE-2025-68161  was incomplete: it addressed hostname verification only when enabled via the  log4j2.sslVerifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/systemproperties.html#log4j2.sslVerifyHostName  system property, but not when configured through the  verifyHostName https:\/\/logging.apache.org\/log4j\/2.x\/manual\/appenders\/network.html#SslConfiguration-attr-verifyHostName  attribute of the <Ssl> element.\n\nAlthough the verifyHostName configuration attribute was introduced in Log4j Core 2.12.0, it was silently ignored in all versions through 2.25.3, leaving TLS connections vulnerable to interception regardless of the configured value.\n\nA network-based attacker may be able to perform a man-in-the-middle attack when all of the following conditions are met:\n\n  *  An SMTP, Socket, or Syslog appender is in use.\n  *  TLS is configured via a nested <Ssl> element.\n  *  The attacker can present a certificate issued by a CA trusted by the appender's configured trust store, or by the default Java trust store if none is configured.\nThis issue does not affect users of the HTTP appender, which uses a separate  verifyHostname https:\/\/logging.apache.org\/log4j\/2.x\/manual\/appenders\/network.html#HttpAppender-attr-verifyHostName  attribute that was not subject to this bug and verifies host names by default.\n\nUsers are advised to upgrade to Apache Log4j Core 2.25.4, which corrects this issue."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "710f6abc9a824373debb03f3c2cb1426"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+                  ,"index": 3
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2026-49844",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2026-49844 - Improper encoding of non-finite floating-point values during MapMessage JSON serialization in Apache Log4j API produces output that is not valid JSON. This issue affects Apache Log4j API versions 2.13.1 through 2.25.4 and version 2.26.0.\n\nThe fix for CVE-2026-34481 did not cover all code paths: when a MapMessage contains a non-finite IEEE 754 value (NaN, Infinity, or -Infinity), MapMessage.asJson() emits the corresponding bare token. RFC 8259 does not permit these tokens, so a conformant parser rejects the resulting document.\n\nThe defect is reachable only when both of the following conditions hold:\n\n  *  The application uses the  message resolver https:\/\/logging.apache.org\/log4j\/2.x\/manual\/json-template-layout.html#event-template-resolver-message  of JsonTemplateLayout or any other layout that relies on MapMessage.asJson() or MapMessage.getFormattedMessage(new String[]{\"JSON\"}).\n  *  The application logs a MapMessage that contains an attacker-controlled floating-point value.\n\n\nAn attacker who can supply a non-finite value can cause the affected layout to emit malformed JSON, which may corrupt the enclosing log record or disrupt downstream log ingestion and parsing.\n\nUsers are advised to upgrade to Apache Log4j API 2.25.5 or 2.26.1, both of which emit RFC 8259-compliant JSON for non-finite values."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "ba1a2cad352f5c80025a94d3511f5308"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+                  ,"index": 3
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }, {
+          "ruleId": "CVE-2021-45105",
+          "level": "warning",
+          "message": {
+            "text": "CVE-2021-45105 - Apache Log4j2 versions 2.0-alpha1 through 2.16.0 (excluding 2.12.3 and 2.3.1) did not protect from uncontrolled recursion from self-referential lookups. This allows an attacker with control over Thread Context Map data to cause a denial of service when a crafted string is interpreted. This issue was fixed in Log4j 2.17.0, 2.12.3, and 2.3.1."
+          },
+          "partialFingerprints": {
+            "vulnerabilityHash": "3aa14225af96c104d78618c2bf4f894d"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file://\/Users\/marcopagnanini\/code\/Security\/rev_1\/ScanEverything\/samples\/vulnapp\/target\/dependency\/log4j-core-2.14.1.jar"
+                  ,"index": 3
+                }
+              }
+                ,"logicalLocations": [
+                    {
+                    "fullyQualifiedName": "pkg:maven\/org.apache.logging.log4j\/log4j-core@2.14.1"
+                    }
+                ]
+              
+            }
+          ]
+          }      ]
+    }
+  ]
+}

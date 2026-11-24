@@ -24,6 +24,9 @@ pub struct Finding {
     pub cwe: Option<String>,
     pub file: Option<String>,
     pub line: Option<u32>,
+    pub cve: Option<String>,
+    pub package: Option<String>,
+    pub description: Option<String>,
 }
 
 #[cfg(test)]

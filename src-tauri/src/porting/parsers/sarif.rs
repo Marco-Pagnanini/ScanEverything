@@ -32,14 +32,8 @@ struct Driver {
 #[derive(Debug, Deserialize)]
 struct Rule {
     id: String,
-    properties: Option<RuleProperties>,
+    properties: Option<serde_json::Value>,
     relationships: Option<Vec<Relationship>>,
-}
-
-#[derive(Debug, Deserialize)]
-struct RuleProperties {
-    #[serde(default)]
-    tags: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -71,14 +65,16 @@ struct SarifResult {
 }
 
 #[derive(Debug, Deserialize)]
-struct Message {
-    text: Option<String>,
-}
-
-#[derive(Debug, Deserialize)]
 #[serde(rename_all = "camelCase")]
 struct Location {
     physical_location: Option<PhysicalLocation>,
+    #[serde(default)]
+    logical_locations: Vec<LogicalLocation>,
+}
+
+#[derive(Debug, Deserialize)]
+struct Message {
+    text: Option<String>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -98,6 +94,13 @@ struct ArtifactLocation {
 struct Region {
     start_line: Option<u32>,
 }
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+struct LogicalLocation {
+    fully_qualified_name: Option<String>,
+}
+
 
 /*
     Convert SARIF to Finding
@@ -127,21 +130,41 @@ pub fn parse_sarif_to_finding(text: &str) -> Result<Vec<Finding>, String> {
 
             let file = place
                 .and_then(|p| p.artifact_location.as_ref())
-                .and_then(|a| a.uri.clone());
+                .and_then(|a| a.uri.as_deref())
+                .map(clean_uri);
 
             let line = place
                 .and_then(|p| p.region.as_ref())
                 .and_then(|r| r.start_line);
 
+            let package = result
+                .locations
+                .first()
+                .and_then(|l| l.logical_locations.first())
+                .and_then(|l| l.fully_qualified_name.clone())
+                .filter(|name| name.starts_with("pkg:"));
+
+            let cve = rule_id.starts_with("CVE-").then(|| rule_id.clone());
+
+            let message = result.message.text.clone().unwrap_or_else(|| rule_id.clone());
+            let title = short_title(&message);
+            let description = (message.trim() != title).then_some(message);
+
             findings.push(Finding {
                 tool: tool.clone(),
                 rule: rule_id.clone(),
-                title: result.message.text.clone().unwrap_or(rule_id),
-                severity: severity_from_level(result.level.as_deref()),
+                title,
+                severity: match rule.and_then(security_score) {
+                    Some(score) => severity_from_score(score),
+                    None => severity_from_level(result.level.as_deref()),
+                },
                 security: rule.map(is_security).unwrap_or(false),
                 cwe: rule.and_then(cwe_of),
                 file,
                 line,
+                cve,
+                package,
+                description,
             });
         }
     }
@@ -157,6 +180,26 @@ fn find_rule<'a>(run: &'a Run, result: &SarifResult) -> Option<&'a Rule> {
     rules.iter().find(|r| r.id == id)
 }
 
+fn severity_from_score(score: f64) -> Severity {
+    if score >= 9.0 {
+        Severity::Critical
+    } else if score >= 7.0 {
+        Severity::High
+    } else if score >= 4.0 {
+        Severity::Medium
+    } else {
+        Severity::Low
+    }
+}
+
+fn security_score(rule: &Rule) -> Option<f64> {
+    match rule.properties.as_ref()?.get("security-severity")? {
+        serde_json::Value::Number(n) => n.as_f64(),
+        serde_json::Value::String(s) => s.trim().parse().ok(),
+        _ => None,
+    }
+}
+
 fn severity_from_level(level: Option<&str>) -> Severity {
     match level {
         Some("error") => Severity::High,
@@ -166,10 +209,14 @@ fn severity_from_level(level: Option<&str>) -> Severity {
 }
 
 fn is_security(rule: &Rule) -> bool {
-    rule.properties
+    let has_tag = rule
+        .properties
         .as_ref()
-        .map(|p| p.tags.iter().any(|t| t == "SECURITY"))
-        .unwrap_or(false)
+        .and_then(|p| p.get("tags"))
+        .and_then(|t| t.as_array())
+        .is_some_and(|tags| tags.iter().any(|t| t.as_str() == Some("SECURITY")));
+
+    has_tag || security_score(rule).is_some()
 }
 
 fn cwe_of(rule: &Rule) -> Option<String> {
@@ -186,6 +233,19 @@ fn cwe_of(rule: &Rule) -> Option<String> {
         .map(|r| format!("CWE-{}", r.target.id))
 }
 
+fn short_title(message: &str) -> String {
+    let first = message.lines().next().unwrap_or("").trim();
+    if first.chars().count() <= 140 {
+        first.to_string()
+    } else {
+        let cut: String = first.chars().take(139).collect();
+        format!("{cut}…").to_string()
+    }
+}
+
+fn clean_uri(uri: &str) -> String {
+    uri.strip_prefix("file://").unwrap_or(uri).to_string()
+}
 /*
     Tests
 */
@@ -221,4 +281,67 @@ mod tests {
     fn rifiuta_un_file_non_sarif() {
         assert!(parse_sarif_to_finding("[1, 2, 3]").is_err());
     }
+
+    const DEPCHECK: &str = include_str!("../../../fixtures/dependency_check_vulnapp.sarif");
+
+    #[test]
+    fn legge_dependency_check() {
+        let findings = parse_sarif_to_finding(DEPCHECK).unwrap();
+        assert_eq!(findings.len(), 14);
+    }
+
+    #[test]
+    fn dependency_check_tutti_di_sicurezza() {
+        let findings = parse_sarif_to_finding(DEPCHECK).unwrap();
+        assert!(findings.iter().all(|f| f.security));
+    }
+
+    #[test]
+    fn log4shell_critica() {
+        let findings = parse_sarif_to_finding(DEPCHECK).unwrap();
+        let log4shell = findings
+            .iter()
+            .find(|f| f.rule == "CVE-2021-44228")
+            .expect("Log4Shell non trovata");
+        assert_eq!(log4shell.severity, Severity::Critical);
+
+        let critiche = findings
+            .iter()
+            .filter(|f| f.severity == Severity::Critical)
+            .count();
+        assert_eq!(critiche, 3);
+    }
+
+    #[test]
+    fn log4shell_cve_e_libreria() {
+        let findings = parse_sarif_to_finding(DEPCHECK).unwrap();
+        let log4shell = findings
+            .iter()
+            .find(|f| f.cve.as_deref() == Some("CVE-2021-44228"))
+            .expect("Log4Shell non trovata");
+        assert_eq!(
+            log4shell.package.as_deref(),
+            Some("pkg:maven/org.apache.logging.log4j/log4j-core@2.14.1")
+        );
+        assert!(log4shell.line.is_none());
+    }
+
+     #[test]
+    fn titoli_brevi() {
+        let depcheck = parse_sarif_to_finding(DEPCHECK).unwrap();
+        assert!(depcheck.iter().all(|f| f.title.chars().count() <= 140));
+        assert!(depcheck.iter().all(|f| f.description.is_some()));
+
+        let spotbugs = parse_sarif_to_finding(VULNAPP).unwrap();
+        assert!(spotbugs.iter().all(|f| f.description.is_none()));
+    }
+
+    #[test]
+    fn percorsi_senza_prefisso_file() {
+        let findings = parse_sarif_to_finding(DEPCHECK).unwrap();
+        assert!(findings
+            .iter()
+            .all(|f| f.file.as_deref().is_some_and(|p| p.starts_with('/'))));
+    }
+
 }
