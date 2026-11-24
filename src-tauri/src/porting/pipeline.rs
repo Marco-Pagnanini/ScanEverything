@@ -1,8 +1,76 @@
-use std::path::{Path, PathBuf};
+use std::path::Path;
+use serde::Serialize;
 
 use crate::porting::finding::Finding;
 use crate::porting::process::ToolCheck;
 use crate::porting::tools::{maven, spotbugs, dependency_check};
+
+/*
+    Report of a scan
+*/
+
+#[derive(Debug, Serialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum StepStatus {
+    Ok,
+    Failed,
+    Skipped,
+}
+
+#[derive(Debug, Serialize)]
+pub struct StepResult {
+    pub name: String,
+    pub status: StepStatus,
+    pub findings: usize,
+    pub detail: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ScanReport {
+    pub steps: Vec<StepResult>,
+    pub findings: Vec<Finding>,
+}
+
+impl ScanReport {
+    fn new() -> Self {
+        ScanReport {
+            steps: Vec::new(),
+            findings: Vec::new(),
+        }
+    }
+
+    fn ok(&mut self, name: &str, found: Vec<Finding>) {
+        self.steps.push(StepResult {
+            name: name.to_string(),
+            status: StepStatus::Ok,
+            findings: found.len(),
+            detail: None,
+        });
+        self.findings.extend(found);
+    }
+
+    fn failed(&mut self, name: &str, error: String) {
+        self.steps.push(StepResult {
+            name: name.to_string(),
+            status: StepStatus::Failed,
+            findings: 0,
+            detail: Some(error),
+        });
+    }
+
+    fn skipped(&mut self, name: &str, reason: &str) {
+        self.steps.push(StepResult {
+            name: name.to_string(),
+            status: StepStatus::Skipped,
+            findings: 0,
+            detail: Some(reason.to_string()),
+        });
+    }
+}
+
+/*
+    Pipeline
+*/
 
 /// Controlla tutti gli strumenti della pipeline.
 pub fn check_tools() -> Vec<ToolCheck> {
@@ -12,33 +80,7 @@ pub fn check_tools() -> Vec<ToolCheck> {
     checks
 }
 
-/// Cosa analizzare: le classi compilate e dove scrivere i risultati.
-struct Target {
-    classes: PathBuf,
-    out_dir: PathBuf,
-    deps: Option<PathBuf>,
-}
 
-/// Prepara le classi compilate.
-/// - un file .jar si usa così com'è (niente Build);
-/// - una cartella con pom.xml viene compilata con Maven.
-fn prepare(input: &Path) -> Result<Target, String> {
-    if is_jar(input) {
-        return Ok(Target {
-            classes: input.to_path_buf(),
-            out_dir: std::env::temp_dir().join("scaneverything"),
-            deps: None,
-        });
-    }
-
-    let classes = maven::build(input)?;
-    let deps = maven::copy_dependencies(input)?;
-    Ok(Target {
-        classes,
-        out_dir: input.join("target"),
-        deps:Some(deps)
-    })
-}
 
 fn is_jar(path: &Path) -> bool {
     path.is_file() && path.extension().is_some_and(|e| e == "jar")
@@ -52,17 +94,66 @@ fn project_name(input: &Path) -> String {
         .to_string()
 }
 
-/// Pipeline minima: (Build) → SpotBugs.
-pub fn scan(input: &Path) -> Result<Vec<Finding>, String> {
-    let target = prepare(input)?;
-    let mut findings = spotbugs::analyze(&target.classes, &target.out_dir)?;
-    if let Some(deps) = &target.deps {
-        let libraries = dependency_check::analyze(deps, &target.out_dir, &project_name(input))?;
-        findings.extend(libraries);
+pub fn scan(input: &Path) -> ScanReport {
+    let mut report = ScanReport::new();
+    let jar = is_jar(input);
+
+    let out_dir = if jar {
+        std::env::temp_dir().join("scaneverything")
+    } else {
+        input.join("target")
+    };
+
+    let classes = if jar {
+        report.skipped("Build", "the input is a jar");
+        Some(input.to_path_buf())
+    } else {
+        match maven::build(input) {
+            Ok(classes) => {
+                report.ok("Build", Vec::new());
+                Some(classes)
+            }
+            Err(e) => {
+                report.failed("Build", e);
+                None
+            }
+        }
+    };
+
+    let deps = if jar {
+        report.skipped("Copy dependencies", "the input is a jar");
+        None
+    } else {
+        match maven::copy_dependencies(input) {
+            Ok(deps) => {
+                report.ok("Copy dependencies", Vec::new());
+                Some(deps)
+            }
+            Err(e) => {
+                report.failed("Copy dependencies", e);
+                None
+            }
+        }
+    };
+
+    match &classes {
+        None => report.skipped("SpotBugs", "no compiled classes"),
+        Some(classes) => match spotbugs::analyze(classes, &out_dir) {
+            Ok(found) => report.ok("SpotBugs", found),
+            Err(e) => report.failed("SpotBugs", e),
+        },
     }
 
-    findings.sort_by_key(|f| (!f.security, f.severity));
-    Ok(findings)
+    match &deps {
+        None => report.skipped("Dependency-Check", "no libraries to analyze"),
+        Some(deps) => match dependency_check::analyze(deps, &out_dir, &project_name(input)) {
+            Ok(found) => report.ok("Dependency-Check", found),
+            Err(e) => report.failed("Dependency-Check", e),
+        },
+    }
+
+    report.findings.sort_by_key(|f| (!f.security, f.severity));
+    report
 }
 
 #[cfg(test)]
@@ -79,5 +170,21 @@ mod tests {
     fn nome_del_progetto() {
         assert_eq!(project_name(Path::new("/tmp/vulnapp")), "vulnapp");
         assert_eq!(project_name(Path::new("/tmp/app-1.0.jar")), "app-1.0");
+    }
+
+    #[test]
+    fn build_fallita_non_blocca_il_report() {
+        let report = scan(Path::new("."));
+        let status: Vec<&StepStatus> = report.steps.iter().map(|s| &s.status).collect();
+        assert_eq!(
+            status,
+            [
+                &StepStatus::Failed,
+                &StepStatus::Failed,
+                &StepStatus::Skipped,
+                &StepStatus::Skipped
+            ]
+        );
+        assert!(report.findings.is_empty());
     }
 }
