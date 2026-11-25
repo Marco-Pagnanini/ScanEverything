@@ -344,4 +344,22 @@ mod tests {
             .all(|f| f.file.as_deref().is_some_and(|p| p.starts_with('/'))));
     }
 
+    #[test]
+    fn regole_generiche_dello_standard() {
+        let text = r#"{"runs": [{
+            "tool": {"driver": {"name": "x", "rules": [{
+                "id": "r1",
+                "defaultConfiguration": {"level": "error"},
+                "properties": {"tags": ["security", "CWE-89: SQL Injection"]}
+            }]}},
+            "results": [{"ruleId": "r1", "message": {"text": "Bad query. Use a prepared statement."}}]
+        }]}"#;
+
+        let f = &parse_sarif_to_finding(text).unwrap()[0];
+        assert_eq!(f.severity, Severity::High);
+        assert!(f.security);
+        assert_eq!(f.cwe.as_deref(), Some("CWE-89"));
+        assert_eq!(f.title, "Bad query");
+    }
+
 }

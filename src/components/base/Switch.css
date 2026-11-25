@@ -1,0 +1,9 @@
+/* Switch */
+.se-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 var(--text-sm) / 1 var(--font);
+  white-space: nowrap;
+  cursor: pointer;
+}

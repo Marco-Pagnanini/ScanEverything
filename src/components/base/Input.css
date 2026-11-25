@@ -1,0 +1,16 @@
+/* Input */
+.se-input .ant-input-prefix {
+  color: var(--muted-foreground);
+  margin-inline-end: 8px;
+}
+
+.se-textarea.ant-input {
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.se-textarea--mono.ant-input {
+  font: 12.5px / 1.6 var(--mono);
+  background: var(--code-bg);
+  tab-size: 4;
+}

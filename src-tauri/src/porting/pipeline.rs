@@ -4,7 +4,9 @@ use serde::Serialize;
 use ts_rs::TS;
 
 use crate::porting::finding::Finding;
-use crate::porting::manifest::{Need, ToolKind, ToolManifest, builtin_manifests};
+use crate::porting::manifest::{
+    Need, ToolKind, ToolManifest, load_user_manifests, save_manifest, user_tools_dir, validate_manifest,
+};
 use crate::porting::process::ToolCheck;
 use crate::porting::tools::{generic, maven};
 
@@ -86,10 +88,26 @@ pub struct ToolInfo {
     pub kind: ToolKind,
     pub description: String,
     pub needs: Vec<Need>,
+    pub source: Option<String>,
+}
+#[derive(Debug, Serialize, TS)]
+#[ts(export)]
+pub struct ToolCatalog {
+    pub folder: String,
+    pub tools: Vec<ToolInfo>,
+    pub errors: Vec<String>,
 }
 
-pub fn list_tools() -> Vec<ToolInfo> {
-    builtin_manifests()
+fn manifests() -> Vec<ToolManifest> {
+    load_user_manifests(&user_tools_dir()).manifests
+}
+
+pub fn list_tools() -> ToolCatalog {
+    let folder = user_tools_dir();
+    let loaded = load_user_manifests(&folder);
+
+    let tools = loaded
+        .manifests
         .into_iter()
         .map(|m| ToolInfo {
             id: m.id,
@@ -97,14 +115,31 @@ pub fn list_tools() -> Vec<ToolInfo> {
             kind: m.kind,
             description: m.description,
             needs: m.run.needs,
+            source: m.source.map(|path| path.display().to_string()),
         })
-        .collect()
+        .collect();
+
+         ToolCatalog {
+        folder: folder.display().to_string(),
+        tools,
+        errors: loaded.errors,
+
+    }
+}
+
+pub fn validate_tool(text: &str) -> Result<Vec<String>, String> {
+    let (_, warnings) = validate_manifest(text, &manifests())?;
+    Ok(warnings)
+}
+
+pub fn save_tool(text: &str) -> Result<String, String> {
+    save_manifest(&user_tools_dir(), text, &manifests()).map(|path| path.display().to_string())
 }
 
 pub fn check_tools() -> Vec<ToolCheck> {
     let vars = generic::base_vars();
     let mut checks = vec![maven::check()];
-    for manifest in builtin_manifests() {
+    for manifest in manifests() {
         checks.extend(generic::check(&manifest, &vars));
     }
     checks
@@ -118,7 +153,7 @@ pub fn scan(input: &Path, tools: &[String]) -> ScanReport {
     let mut report = ScanReport::new();
     let jar = is_jar(input);
 
-    let chosen: Vec<ToolManifest> = builtin_manifests()
+    let chosen: Vec<ToolManifest> = manifests()
         .into_iter()
         .filter(|m| tools.contains(&m.id))
         .collect();
@@ -169,6 +204,7 @@ pub fn scan(input: &Path, tools: &[String]) -> ScanReport {
     let mut vars = generic::base_vars();
     vars.insert("out".to_string(), out_dir.display().to_string());
     vars.insert("name".to_string(), project_name(input));
+    vars.insert("project".to_string(), input.display().to_string());
     if let Some(classes) = &classes {
         vars.insert("classes".to_string(), classes.display().to_string());
     }
@@ -256,10 +292,10 @@ mod tests {
 
     #[test]
     fn lista_degli_strumenti() {
-        let tools = list_tools();
-        let ids: Vec<&str> = tools.iter().map(|t| t.id.as_str()).collect();
-        assert_eq!(ids, ["spotbugs", "dependency-check"]);
-        assert_eq!(tools[0].needs, [Need::Classes]);
+         let catalog = list_tools();
+        let ids: Vec<&str> = catalog.tools.iter().map(|t| t.id.as_str()).collect();
+        assert!(ids.contains(&"spotbugs"));
+        assert!(ids.contains(&"dependency-check"));
     }
 
     #[test]

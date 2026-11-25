@@ -1,0 +1,236 @@
+/* Splash */
+.se-splash {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 100%;
+  padding: 24px;
+  overflow: hidden;
+  background:
+    radial-gradient(700px 480px at 50% 36%, color-mix(in srgb, var(--primary) 9%, transparent), transparent 70%),
+    var(--background);
+}
+
+.se-splash__orbit {
+  flex: none;
+  width: min(560px, calc(100vh - 330px), calc(100vw - 48px));
+}
+
+.se-splash__text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  text-align: center;
+}
+
+.se-splash h1 {
+  font: 600 var(--text-display) / 1.04 var(--font);
+  letter-spacing: -0.04em;
+  animation: se-rise 0.9s var(--ease-out) 0.25s backwards;
+}
+
+.se-splash h1 span {
+  color: var(--primary);
+}
+
+.se-splash p {
+  max-width: 44ch;
+  font-size: 17px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+  text-wrap: balance;
+  animation: se-rise 0.9s var(--ease-out) 0.38s backwards;
+}
+
+.se-splash__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 10px;
+  animation: se-rise 0.9s var(--ease-out) 0.5s backwards;
+}
+
+.se-splash__note {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 10px;
+  min-height: 24px;
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+}
+
+@media (max-height: 720px) {
+  .se-splash__orbit {
+    width: min(560px, calc(100vh - 290px), calc(100vw - 48px));
+  }
+
+  .se-splash h1 {
+    font-size: 40px;
+  }
+
+  .se-splash p {
+    font-size: 15px;
+  }
+}
+
+/* Page layouts */
+.se-page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  min-height: 100%;
+}
+
+.se-page--narrow {
+  max-width: 880px;
+  gap: 22px;
+}
+
+.se-page__note {
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+}
+
+.se-page__note code {
+  color: var(--foreground);
+  overflow-wrap: anywhere;
+}
+
+.se-page__loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 100%;
+  color: var(--muted-foreground);
+}
+
+/* Canvas */
+.se-canvas {
+  flex: 1 0 auto;
+  display: flex;
+  min-height: 320px;
+  padding: 28px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--canvas);
+  overflow: auto;
+  container-type: inline-size;
+}
+
+@container (max-width: 700px) {
+  .se-canvas .se-node {
+    width: 208px;
+  }
+
+  .se-canvas .se-graph__link {
+    width: 16px;
+  }
+}
+
+/* Tools */
+.se-kind {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.se-kind__title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 2px;
+  font: 600 var(--text-sm) / 1 var(--font);
+  color: color-mix(in srgb, var(--tone) 86%, #000);
+}
+
+.se-kind__title::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--tone);
+}
+
+.se-kind__title span {
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+
+/* Run */
+.se-runbar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px 14px;
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--card);
+}
+
+.se-runbar__mark {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--muted);
+  color: var(--muted-foreground);
+}
+
+.se-runbar.is-running .se-runbar__mark {
+  background: var(--p-soft);
+  color: var(--primary);
+}
+
+.se-runbar.is-done .se-runbar__mark {
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+}
+
+.se-runbar__text {
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.se-runbar__text h2 {
+  font: 600 var(--text-lg) / 1.3 var(--font);
+  letter-spacing: -0.01em;
+}
+
+.se-runbar__text p {
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+.se-runbar__time {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font: 500 var(--text-lg) var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.se-runbar__time .se-icon {
+  color: var(--muted-foreground);
+}
+
+/* Report */
+.se-report__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--muted-foreground);
+}

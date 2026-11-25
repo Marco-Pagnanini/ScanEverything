@@ -1,80 +1,99 @@
-import { useEffect, useState } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { open } from "@tauri-apps/plugin-dialog";
-import "./App.css";
-import type { Finding } from "./bindings/Finding";
+import { useCallback, useEffect, useState } from "react";
 import type { ScanReport } from "./bindings/ScanReport";
-import type { StepResult } from "./bindings/StepResult";
+import type { ToolCatalog } from "./bindings/ToolCatalog";
 import type { ToolCheck } from "./bindings/ToolCheck";
-import type { ToolInfo } from "./bindings/ToolInfo";
+import {
+    checkTools,
+    listTools,
+    manifestTemplate,
+    openExternal,
+    pickJar,
+    pickProject,
+    saveTool,
+    scanProject,
+    validateTool,
+} from "./api";
+import { Button } from "./components/base";
+import { AppShell, ToolEditorModal, type NavItem } from "./components/composite";
+import { MAVEN, baseName, readiness, runBlocker } from "./lib/tools";
+import { PipelinePage } from "./pages/PipelinePage";
+import { ReportPage } from "./pages/ReportPage";
+import { RunPage } from "./pages/RunPage";
+import { SplashPage } from "./pages/SplashPage";
+import { ToolsPage } from "./pages/ToolsPage";
 
-const GROUPS = [
-    { kind: "static", label: "Analisi statica" },
-    { kind: "dynamic", label: "Analisi dinamica" },
-] as const;
+type ShellPage = "pipeline" | "tools" | "run" | "report";
+type Page = "splash" | ShellPage;
+
+const TITLES: Record<ShellPage, string> = {
+    pipeline: "Pipeline",
+    tools: "Tools",
+    run: "Run",
+    report: "Report",
+};
 
 function App() {
-    const [catalog, setCatalog] = useState<ToolInfo[]>([]);
-    const [tools, setTools] = useState<ToolCheck[]>([]);
+    const [page, setPage] = useState<Page>("splash");
+    const [catalog, setCatalog] = useState<ToolCatalog | null>(null);
+    const [checks, setChecks] = useState<ToolCheck[] | null>(null);
+    const [loadError, setLoadError] = useState<string | null>(null);
     const [selected, setSelected] = useState<string[]>([]);
     const [input, setInput] = useState<string | null>(null);
-    const [steps, setSteps] = useState<StepResult[]>([]);
-    const [findings, setFindings] = useState<Finding[]>([]);
+    const [report, setReport] = useState<ScanReport | null>(null);
     const [error, setError] = useState<string | null>(null);
     const [running, setRunning] = useState(false);
+    const [startedAt, setStartedAt] = useState<number | null>(null);
+    const [editorOpen, setEditorOpen] = useState(false);
 
-    useEffect(() => {
-        invoke<ToolInfo[]>("list_tools")
-            .then((list) => {
-                setCatalog(list);
-                setSelected(list.map((t) => t.id));
+    /* Tools */
+    const loadTools = useCallback(() => {
+        setChecks(null);
+        setLoadError(null);
+        listTools()
+            .then((c) => {
+                setCatalog(c);
+                setSelected(c.tools.map((t) => t.id));
             })
-            .catch((e) => setError(String(e)));
-
-        invoke<ToolCheck[]>("check_tools")
-            .then(setTools)
-            .catch((e) => setError(String(e)));
+            .catch((e) => setLoadError(String(e)));
+        checkTools()
+            .then(setChecks)
+            .catch((e) => {
+                setChecks([]);
+                setLoadError(String(e));
+            });
     }, []);
 
-    const ready = (tool: string) => tools.filter((t) => t.tool === tool).every((t) => t.ok);
-    const canRun = tools.length > 0 && selected.length > 0 && ready("maven") && selected.every(ready);
+    useEffect(loadTools, [loadTools]);
+
+    const tools = catalog?.tools ?? [];
+    const blocker = runBlocker({ input, selected, tools, checks });
 
     function toggle(id: string) {
         setSelected((s) => (s.includes(id) ? s.filter((x) => x !== id) : [...s, id]));
     }
 
-    function pick(path: string) {
+    /* Input */
+    function pick(path: string | null) {
+        if (!path) return;
         setInput(path);
-        setSteps([]);
-        setFindings([]);
+        setReport(null);
         setError(null);
+        if (page === "splash") setPage("pipeline");
     }
 
-    async function chooseProject() {
-        const dir = await open({ directory: true, multiple: false, title: "Progetto Maven da analizzare" });
-        if (typeof dir === "string") pick(dir);
-    }
+    const chooseProject = () => pickProject().then(pick);
+    const chooseJar = () => pickJar().then(pick);
 
-    async function chooseJar() {
-        const file = await open({
-            directory: false,
-            multiple: false,
-            title: "Jar da analizzare",
-            filters: [{ name: "Java archive", extensions: ["jar"] }],
-        });
-        if (typeof file === "string") pick(file);
-    }
-
+    /* Scan */
     async function scan() {
-        if (!input) return;
+        if (!input || blocker || running) return;
         setError(null);
-        setSteps([]);
-        setFindings([]);
+        setReport(null);
         setRunning(true);
+        setStartedAt(Date.now());
+        setPage("run");
         try {
-            const report = await invoke<ScanReport>("scan_project", { input, tools: selected });
-            setSteps(report.steps);
-            setFindings(report.findings);
+            setReport(await scanProject(input, selected));
         } catch (e) {
             setError(String(e));
         } finally {
@@ -82,95 +101,121 @@ function App() {
         }
     }
 
+    if (page === "splash") {
+        return (
+            <SplashPage
+                tools={tools}
+                current={input && baseName(input)}
+                onOpenProject={chooseProject}
+                onOpenJar={chooseJar}
+                onContinue={() => setPage("pipeline")}
+            />
+        );
+    }
+
+    /* Shell */
+    const project = input ? baseName(input) : "your project";
+    const blocked = [MAVEN, ...tools.map((t) => t.id)].filter((id) => readiness(checks, id) === "blocked").length;
+    const toolsAlert = loadError || (catalog?.errors.length ?? 0) > 0 ? "!" : blocked > 0 ? String(blocked) : null;
+
+    const nav: NavItem<ShellPage>[] = [
+        { id: "pipeline", label: "Pipeline", icon: "pipeline" },
+        { id: "tools", label: "Tools", icon: "tools", badge: toolsAlert ? { text: toolsAlert, alert: true } : undefined },
+        { id: "run", label: "Run", icon: "run" },
+        {
+            id: "report",
+            label: "Report",
+            icon: "report",
+            badge: report && report.findings.length > 0 ? { text: String(report.findings.length) } : undefined,
+        },
+    ];
+
+    const subtitles: Record<ShellPage, string> = {
+        pipeline: `Choose what runs on ${project}. Click a tool to turn it on or off.`,
+        tools: "What is installed on this machine, and what each tool still needs before it can run.",
+        run: `Start the analysis of ${project} and see how each step ended.`,
+        report: "Everything the tools found, merged into one list.",
+    };
+
+    const runAction = (
+        <>
+            {blocker && !running && <span className="se-main__hint">{blocker}</span>}
+            <Button variant="primary" size="lg" pill icon="play" loading={running} disabled={!!blocker} onClick={scan}>
+                {running ? "Analysis running…" : report ? "Run again" : "Run pipeline"}
+            </Button>
+        </>
+    );
+
+    const toolsAction = (
+        <>
+            <Button icon="refresh" disabled={running} onClick={loadTools}>
+                Reload
+            </Button>
+            <Button variant="primary" icon="plus" disabled={running || !catalog} onClick={() => setEditorOpen(true)}>
+                Add tool
+            </Button>
+        </>
+    );
+
     return (
-        <main className="container" style={{ textAlign: "left" }}>
-            <h1>Scan Everything</h1>
+        <>
+            <AppShell
+                nav={nav}
+                page={page}
+                onNavigate={setPage}
+                onHome={() => setPage("splash")}
+                input={input}
+                busy={running}
+                onOpenProject={chooseProject}
+                onOpenJar={chooseJar}
+                title={TITLES[page]}
+                subtitle={subtitles[page]}
+                actions={page === "tools" ? toolsAction : runAction}
+            >
+                {page === "pipeline" && (
+                    <PipelinePage
+                        tools={tools}
+                        loading={!catalog && !loadError}
+                        selected={selected}
+                        checks={checks}
+                        input={input}
+                        running={running}
+                        onToggle={toggle}
+                        onGoTools={() => setPage("tools")}
+                    />
+                )}
+                {page === "tools" && <ToolsPage catalog={catalog} checks={checks} loadError={loadError} />}
+                {page === "run" && (
+                    <RunPage
+                        tools={tools}
+                        selected={selected}
+                        input={input}
+                        running={running}
+                        startedAt={startedAt}
+                        report={report}
+                        error={error}
+                        onRetry={scan}
+                        onOpenReport={() => setPage("report")}
+                    />
+                )}
+                {page === "report" && (
+                    <ReportPage report={report} running={running} onGoRun={() => setPage("run")} onOpenUrl={openExternal} />
+                )}
+            </AppShell>
 
-            <h3>Strumenti</h3>
-            <ul>
-                {tools.map((t) => (
-                    <li key={`${t.tool}-${t.name}`} style={{ color: t.ok ? "seagreen" : "tomato" }}>
-                        {t.ok ? "✔" : "✘"} <b>{t.name}</b> — {t.detail}
-                    </li>
-                ))}
-            </ul>
-
-            <h3>Pipeline</h3>
-            {GROUPS.map(({ kind, label }) => {
-                const group = catalog.filter((t) => t.kind === kind);
-                if (group.length === 0) return null;
-                return (
-                    <div key={kind} style={{ marginBottom: 8 }}>
-                        <b>{label}</b>
-                        {group.map((t) => (
-                            <label key={t.id} style={{ display: "block" }}>
-                                <input
-                                    type="checkbox"
-                                    checked={selected.includes(t.id)}
-                                    onChange={() => toggle(t.id)}
-                                    disabled={running}
-                                />{" "}
-                                {t.name}
-                                {!ready(t.id) && <span style={{ color: "tomato" }}> — non pronto</span>}
-                                <br />
-                                <small style={{ opacity: 0.7 }}>{t.description}</small>
-                            </label>
-                        ))}
-                    </div>
-                );
-            })}
-
-            <div className="row" style={{ gap: 8, justifyContent: "flex-start", marginTop: 12 }}>
-                <button onClick={chooseProject} disabled={running}>Scegli progetto</button>
-                <button onClick={chooseJar} disabled={running}>Scegli jar</button>
-                <button onClick={scan} disabled={!input || !canRun || running}>
-                    {running ? "Analisi in corso…" : "Analizza"}
-                    {running && <span className="spinner" style={{ marginLeft: 8 }}></span>}
-                </button>
-            </div>
-            <p><code>{input ?? "Niente da analizzare"}</code></p>
-
-            {error && <pre style={{ color: "tomato", whiteSpace: "pre-wrap" }}>{error}</pre>}
-
-            {steps.length > 0 && (
-                <>
-                    <h3>Step</h3>
-                    <ul>
-                        {steps.map((s) => (
-                            <li
-                                key={s.name}
-                                style={{
-                                    color: s.status === "ok" ? "seagreen" : s.status === "failed" ? "tomato" : "gray",
-                                }}
-                            >
-                                {s.status === "ok" ? "✔" : s.status === "failed" ? "✘" : "–"} <b>{s.name}</b>
-                                {s.status === "ok" && ` — ${s.findings} finding`}
-                                {s.detail && <pre style={{ whiteSpace: "pre-wrap", margin: 0 }}>{s.detail}</pre>}
-                            </li>
-                        ))}
-                    </ul>
-                </>
-            )}
-
-            {findings.length > 0 && (
-                <p>
-                    {findings.length} finding · {findings.filter((f) => f.security).length} di sicurezza
-                </p>
-            )}
-            <ul>
-                {findings.map((f, i) => (
-                    <li key={i} style={{ opacity: f.security ? 1 : 0.55 }}>
-                        {f.security && <b>SICUREZZA </b>}
-                        [{f.severity}] {f.title}
-                        {f.cwe && ` · ${f.cwe}`}
-                        {" — "}
-                        {f.package
-                            ? `${f.package} (${f.file ?? ""})`
-                            : f.file ? `${f.file}:${f.line ?? ""}` : "(nessun file)"}
-                    </li>
-                ))}
-            </ul>
-        </main>
+            <ToolEditorModal
+                open={editorOpen}
+                folder={catalog?.folder ?? ""}
+                loadTemplate={manifestTemplate}
+                validate={validateTool}
+                save={saveTool}
+                onClose={() => setEditorOpen(false)}
+                onSaved={() => {
+                    setEditorOpen(false);
+                    loadTools();
+                }}
+            />
+        </>
     );
 }
 

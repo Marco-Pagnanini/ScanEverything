@@ -4,8 +4,9 @@ use std::path::Path;
 
 use porting::finding::Finding;
 use porting::parsers::sarif::parse_sarif_to_finding;
-use porting::pipeline::{self, ScanReport, ToolInfo};
+use porting::pipeline::{self, ScanReport, ToolCatalog};
 use porting::process::ToolCheck;
+use porting::manifest::TEMPLATE;
 
 #[tauri::command]
 fn load_findings(path: String) -> Result<Vec<Finding>, String> {
@@ -23,7 +24,7 @@ fn load_findings(path: String) -> Result<Vec<Finding>, String> {
 }
 
 #[tauri::command]
-fn list_tools() -> Vec<ToolInfo> {
+fn list_tools() -> ToolCatalog {
     pipeline::list_tools()
 }
 
@@ -41,6 +42,21 @@ async fn scan_project(input: String, tools: Vec<String>) -> Result<ScanReport, S
         .map_err(|e| format!("Internal error: {e}"))
 }
 
+#[tauri::command]
+fn manifest_template() -> &'static str {
+    TEMPLATE
+}
+
+#[tauri::command]
+fn validate_tool(text: String) -> Result<Vec<String>, String> {
+    pipeline::validate_tool(&text)
+}
+
+#[tauri::command]
+fn save_tool(text: String) -> Result<String, String> {
+    pipeline::save_tool(&text)
+}
+
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     tauri::Builder::default()
@@ -50,7 +66,10 @@ pub fn run() {
             load_findings,
             list_tools,
             check_tools,
-            scan_project
+            scan_project,
+            manifest_template,
+            validate_tool,
+            save_tool
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

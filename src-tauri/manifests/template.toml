@@ -1,0 +1,17 @@
+id = "my-tool"
+name = "My tool"
+kind = "static"
+description = "What the tool finds."
+
+[check]
+program = "my-tool"
+args = ["--version"]
+
+[run]
+program = "my-tool"
+args = ["--sarif", "--output", "{out}/my-tool.sarif", "{project}"]
+needs = []
+
+[output]
+file = "my-tool.sarif"
+format = "sarif"

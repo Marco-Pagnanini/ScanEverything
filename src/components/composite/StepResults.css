@@ -1,0 +1,74 @@
+/* StepResults */
+.se-steps__step + .se-steps__step {
+  border-top: 1px solid var(--border);
+}
+
+.se-steps__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 18px;
+  list-style: none;
+}
+
+.se-steps__head::-webkit-details-marker {
+  display: none;
+}
+
+summary.se-steps__head {
+  cursor: pointer;
+  transition: background-color var(--fast);
+}
+
+summary.se-steps__head:hover {
+  background: var(--hover);
+}
+
+summary.se-steps__head:focus-visible {
+  outline-offset: -2px;
+}
+
+.se-steps__icon {
+  color: var(--muted-foreground);
+}
+
+.is-ok > .se-steps__head .se-steps__icon {
+  color: var(--success);
+}
+
+.is-failed > .se-steps__head .se-steps__icon,
+.is-failed > .se-steps__head .se-steps__outcome {
+  color: var(--danger);
+}
+
+.se-steps__name {
+  font: 500 var(--text-md) var(--font);
+}
+
+.se-steps__outcome {
+  margin-left: auto;
+  font-size: var(--text-sm);
+  color: var(--muted-foreground);
+}
+
+.se-steps__chevron {
+  color: var(--muted-foreground);
+  transition: transform var(--medium) var(--ease-out);
+}
+
+details[open] > summary .se-steps__chevron {
+  transform: rotate(90deg);
+}
+
+.se-steps__detail {
+  margin: 0 18px 14px 42px;
+  padding: 10px 12px;
+  max-height: 260px;
+  border-radius: var(--r-md);
+  background: var(--code-bg);
+  font-size: 12px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  overflow: auto;
+}

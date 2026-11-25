@@ -2,4 +2,4 @@
 import type { Need } from "./Need";
 import type { ToolKind } from "./ToolKind";
 
-export type ToolInfo = { id: string, name: string, kind: ToolKind, description: string, needs: Array<Need>, };
+export type ToolInfo = { id: string, name: string, kind: ToolKind, description: string, needs: Array<Need>, source: string | null, };

@@ -1,0 +1,106 @@
+/* SeveritySummary */
+.se-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+.se-summary__total {
+  flex: 1 1 220px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 10px 10px;
+  padding: 16px 18px;
+  border-radius: var(--r-lg);
+  background: var(--p-dark);
+  color: #fff;
+}
+
+.se-summary__number {
+  font: 600 36px / 1 var(--font);
+  letter-spacing: -0.03em;
+}
+
+.se-summary__scope {
+  font-size: var(--text-sm);
+  color: rgba(255, 255, 255, 0.78);
+}
+
+.se-summary__bar {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 3px;
+  height: 8px;
+}
+
+.se-summary__bar span {
+  border-radius: var(--r-pill);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.28);
+}
+
+/* Levels */
+.se-summary__levels {
+  flex: 3 1 360px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--gap);
+}
+
+.se-summary__level {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  background: var(--card);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    border-color var(--fast),
+    background-color var(--fast),
+    opacity var(--fast),
+    transform var(--fast);
+}
+
+.se-summary__level:hover {
+  border-color: color-mix(in srgb, var(--tone) 50%, transparent);
+}
+
+.se-summary__level:active {
+  transform: scale(0.98);
+}
+
+.se-summary__level.is-active {
+  border-color: var(--tone);
+  background: color-mix(in srgb, var(--tone) 8%, var(--card));
+}
+
+.se-summary__level.is-dim {
+  opacity: 0.55;
+}
+
+.se-summary__count {
+  font: 600 26px / 1 var(--font);
+  letter-spacing: -0.02em;
+}
+
+.se-summary__name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font: 500 var(--text-sm) / 1 var(--font);
+  color: color-mix(in srgb, var(--tone) 80%, #000);
+}
+
+.se-summary__name .se-icon {
+  color: var(--tone);
+}
+
+@media (max-width: 720px) {
+  .se-summary__levels {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

@@ -1,0 +1,114 @@
+/* PipelineGraph */
+.se-graph {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+  max-width: 100%;
+  margin: auto;
+}
+
+.se-graph__row,
+.se-graph__linked {
+  display: flex;
+  align-items: center;
+}
+
+.se-graph__row {
+  flex-wrap: wrap;
+  justify-content: center;
+  row-gap: 12px;
+}
+
+.se-graph__stage {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  max-width: 100%;
+}
+
+.se-graph__start {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 96px;
+  height: 40px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-pill);
+  background: var(--card);
+  font: 600 13.5px var(--font);
+}
+
+.se-graph__start .se-icon {
+  color: var(--primary);
+}
+
+/* Connectors */
+.se-graph__link {
+  width: 40px;
+  height: 0;
+  border-top: 1.5px solid var(--input);
+}
+
+.se-graph__drop {
+  width: 0;
+  height: 26px;
+  border-left: 1.5px solid var(--input);
+}
+
+/* Band */
+.se-band {
+  max-width: 100%;
+  padding: 14px 22px 22px;
+  border: 1px dashed color-mix(in srgb, var(--tone) 38%, transparent);
+  border-radius: var(--r-xl);
+  background: color-mix(in srgb, var(--tone) 5%, var(--card));
+}
+
+.se-band__head {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  margin-bottom: 14px;
+}
+
+.se-band__mark {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+  background: var(--tone);
+}
+
+.se-band__head h2 {
+  font: 600 13.5px / 1.2 var(--font);
+  color: color-mix(in srgb, var(--tone) 86%, #000);
+}
+
+.se-band__hint {
+  font-size: var(--text-sm);
+  line-height: 1.2;
+  color: var(--muted-foreground);
+}
+
+.se-band__count {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  margin-left: auto;
+  padding: 0 9px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--tone) 14%, transparent);
+  color: color-mix(in srgb, var(--tone) 86%, #000);
+  font: 600 var(--text-xs) / 1 var(--font);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.se-band__nodes {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}

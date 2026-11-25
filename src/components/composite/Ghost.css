@@ -1,0 +1,113 @@
+/* Ghost */
+.se-ghost {
+  --shape: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 128' preserveAspectRatio='none'%3E%3Cpath d='M0 50A50 50 0 0 1 100 50V112C100 121.5 92.5 128 83.5 128C76 128 71.5 122 66.7 122C61.5 122 57 128 50 128C43 128 38.5 122 33.3 122C28.5 122 24 128 16.5 128C7.5 128 0 121.5 0 112Z'/%3E%3C/svg%3E");
+  position: relative;
+  flex: none;
+  aspect-ratio: 100 / 128;
+}
+
+.se-ghost__body {
+  position: absolute;
+  inset: 0;
+  background:
+    url("../../assets/ghost-skin.jpg") 50% 50% / 100% 100% no-repeat,
+    #2a3448;
+  -webkit-mask: var(--shape) center / 100% 100% no-repeat;
+  mask: var(--shape) center / 100% 100% no-repeat;
+}
+
+.se-ghost__body::after {
+  content: "";
+  position: absolute;
+  inset: -20%;
+  background: radial-gradient(40% 32% at 50% 50%, rgba(244, 170, 214, 0.55), transparent 70%);
+  mix-blend-mode: soft-light;
+  opacity: 0;
+}
+
+/* Eyes */
+.se-ghost__eye {
+  position: absolute;
+  top: 33%;
+  width: 17.2%;
+  height: 20.9%;
+  border-radius: 50%;
+  background: #f7f7f8;
+  transform: translate(calc(var(--lx, 0) * var(--er, 0px)), calc(var(--ly, 0) * var(--er, 0px) * 0.8));
+  transition: transform 0.35s var(--ease-out);
+}
+
+.se-ghost__eye--l {
+  left: 22.4%;
+}
+
+.se-ghost__eye--r {
+  left: 52.8%;
+}
+
+/* Live */
+.se-ghost--live .se-ghost__body {
+  background-size:
+    150% 150%,
+    auto;
+  animation: se-ghost-skin 16s ease-in-out infinite alternate;
+}
+
+.se-ghost--live .se-ghost__body::after {
+  opacity: 1;
+  animation: se-ghost-glint 9s ease-in-out infinite alternate;
+}
+
+.se-ghost--live .se-ghost__eye {
+  animation: se-ghost-wink 5.5s infinite;
+}
+
+.se-ghost--live .se-ghost__eye--r {
+  animation-delay: 0.04s;
+}
+
+@keyframes se-ghost-skin {
+  0% {
+    background-position:
+      18% 22%,
+      0 0;
+  }
+  35% {
+    background-position:
+      62% 34%,
+      0 0;
+  }
+  70% {
+    background-position:
+      40% 78%,
+      0 0;
+  }
+  100% {
+    background-position:
+      80% 60%,
+      0 0;
+  }
+}
+
+@keyframes se-ghost-glint {
+  0% {
+    transform: translate(-18%, -12%);
+  }
+  100% {
+    transform: translate(16%, 20%);
+  }
+}
+
+@keyframes se-ghost-wink {
+  0%,
+  90%,
+  100% {
+    scale: 1 1;
+  }
+  93% {
+    scale: 1 0.08;
+  }
+  96% {
+    scale: 1 1;
+  }
+}

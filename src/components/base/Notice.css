@@ -1,0 +1,41 @@
+/* Notice */
+.se-notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: var(--r-md);
+  background: color-mix(in srgb, var(--tone) 8%, var(--card));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--tone) 28%, transparent);
+  color: color-mix(in srgb, var(--tone) 78%, #000);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.se-notice__icon {
+  margin-top: 2px;
+  color: var(--tone);
+}
+
+.se-notice__body {
+  flex: 1;
+  min-width: 0;
+}
+
+.se-notice__title {
+  font-weight: 600;
+}
+
+.se-notice__text {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.se-notice__title + .se-notice__text {
+  margin-top: 2px;
+  color: var(--foreground);
+}
+
+.se-notice__text--mono {
+  font: 12px / 1.6 var(--mono);
+}

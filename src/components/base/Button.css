@@ -1,0 +1,26 @@
+/* Button */
+.se-btn.ant-btn {
+  transition:
+    transform var(--fast),
+    background-color var(--fast),
+    border-color var(--fast),
+    color var(--fast);
+}
+
+.se-btn.ant-btn:not(:disabled):active {
+  transform: scale(0.97);
+}
+
+.se-btn.ant-btn-lg {
+  font-size: 15px;
+}
+
+.se-btn.ant-btn-sm {
+  font-size: var(--text-sm);
+  font-weight: 500;
+}
+
+.se-btn.ant-btn:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+}
